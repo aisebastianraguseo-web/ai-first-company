@@ -1,0 +1,17 @@
+# Anthropic API Client
+anthropic==0.40.0
+
+# CLI-Tool für User-Input
+click==8.1.7
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Pretty Output
+rich==13.7.0
+
+# YAML Parsing
+pyyaml==6.0.1
+
+# HTTP Requests (für fallback/testing)
+requests==2.31.0

@@ -1,0 +1,30 @@
+# Environment
+.env
+.env.local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Generated (wird per Code erzeugt, nicht commiten)
+products/*/generated/node_modules/
+products/*/generated/.next/
+products/*/generated/build/
