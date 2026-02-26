@@ -1,0 +1,108 @@
+product:
+  id: expense-tracker
+  name: ExpenseTracker
+  version: "0.1.0"
+  status: in-development
+  created_at: "2026-02-24"
+  owner: human-layer
+
+vision: >
+  App für Freelancer um Ausgaben zu tracken.
+  Mit Beleg-Foto und automatischer Kategorisierung.
+  Export für Steuererklärung.
+
+stack:
+  platform: web
+  technologies:
+    - HTML5
+    - CSS3
+    - JavaScript (Vanilla ES2022+)
+  pwa: true
+  offline_support: true
+  target_devices:
+    - Mobile (primary)
+    - Desktop (secondary)
+  browser_support:
+    - Chrome 100+
+    - Firefox 100+
+    - Safari 15+
+    - Edge 100+
+
+personas:
+  file: personas/variables.yaml
+  count: 6
+  adversarial: true
+
+specs:
+  vision: specs/product-vision.md
+  mvp: specs/mvp-scope.md
+  features:
+    - specs/feature-beleg-capture.md
+    - specs/feature-kategorien.md
+    - specs/feature-steuer-export.md
+
+pipeline:
+  autonomy_defaults:
+    bug_fix: FULL
+    style: FULL
+    performance: FULL
+    a11y_fix: FULL
+    security_patch: FULL
+    new_feature: HUMAN
+    architecture: HUMAN
+    ux_change: BATCH
+  gate_thresholds:
+    test_coverage_min: 80
+    performance_score_min: 85
+    a11y_score_min: 95
+    security_score_min: 100
+
+governance:
+  code_standards: ../../governance/code-standards.md
+  security_policy: ../../governance/security-policy.md
+  accessibility_policy: ../../governance/accessibility-policy.md
+  quality_gates: ../../governance/quality-gates.md
+
+integrations:
+  ocr_api: false          # Phase 2 — KI-gestützte Kategorisierung
+  cloud_sync: false       # Phase 2 — Optionale Datensicherung
+  tax_export_format: CSV  # Phase 1 — Einfacher CSV-Export
+
+constraints:
+  no_backend_phase1: true  # Phase 1 komplett clientseitig (LocalStorage)
+  gdpr_compliant: true
+  data_stays_local: true   # Keine Daten auf externen Servern in Phase 1
+  max_upload_size_mb: 10
+  supported_receipt_formats:
+    - JPEG
+    - PNG
+    - PDF
+
+milestones:
+  phase_1:
+    name: MVP — Lokale Datenhaltung
+    features:
+      - Ausgabe manuell erfassen
+      - Beleg-Foto hochladen (lokal)
+      - Manuelle Kategorisierung
+      - CSV-Export
+    estimated_sprints: 2
+  phase_2:
+    name: Smart — OCR + Auto-Kategorisierung
+    decision: DEC-003 (2026-02-25)
+    technology: Tesseract.js (WASM, lokal) — PENDING_CONFIRMATION
+    features:
+      - OCR für Belege (Tesseract.js oder API — BATCH_APPROVAL ausstehend)
+      - Auto-Kategorisierung (regelbasiert + Keyword-Matching)
+      - Lernmechanismus (User-Korrekturen → lokales Dictionary)
+      - Cloud-Sync (optional, nach Phase 2 OCR)
+    spec: specs/feature-ocr-kategorisierung.md
+    estimated_sprints: 2
+    trigger: "Nach MVP-Deployment + User-Feedback"
+  phase_3:
+    name: Pro — Steuer-Integration
+    features:
+      - DATEV-Export
+      - Steuerberater-Zugang
+      - Jahresabschluss-Report
+    estimated_sprints: 2

@@ -1,0 +1,141 @@
+system:
+  name: "AI-First Company"
+  version: "1.0.0"
+  initialized_at: "2026-02-24T00:00:00"
+  last_updated: "2026-02-24T00:00:00"
+  status: operational
+
+architecture:
+  layers:
+    human_layer:
+      status: active
+      daily_time_budget_minutes: 30
+      owner: human
+
+    governance_layer:
+      status: active
+      files:
+        - governance/code-standards.md
+        - governance/security-policy.md
+        - governance/accessibility-policy.md
+        - governance/quality-gates.md
+      last_review: "2026-02-24"
+      next_review: "2026-05-24"
+
+    meta_orchestration:
+      status: active
+      agents:
+        persona-architect: { file: agents/meta/persona-architect.md, status: ready }
+        spec-writer: { file: agents/meta/spec-writer.md, status: ready }
+        product-bootstrapper: { file: agents/meta/product-bootstrapper.md, status: ready }
+        feedback-classifier: { file: agents/meta/feedback-classifier.md, status: ready }
+        task-splitter: { file: agents/meta/task-splitter.md, status: ready }
+        proactive-improver: { file: agents/meta/proactive-improver.md, status: ready }
+
+    specialized_agents:
+      status: active
+      agents:
+        security-challenger: { file: agents/specialized/security-challenger.md, status: ready }
+        accessibility-challenger: { file: agents/specialized/accessibility-challenger.md, status: ready }
+        quality-gate: { file: agents/specialized/quality-gate.md, status: ready }
+        performance-advisor: { file: agents/specialized/performance-advisor.md, status: ready }
+
+    exploration_layer:
+      status: active
+      agents:
+        feedback-challenger: { file: exploration/feedback-challenger.md, status: ready }
+        pattern-connector: { file: exploration/pattern-connector.md, status: ready }
+        persona-validator: { file: exploration/persona-validator.md, status: ready }
+        contrarian-agent: { file: exploration/contrarian-agent.md, status: ready }
+        synthesis-agent: { file: exploration/synthesis-agent.md, status: ready }
+
+    automation:
+      status: active
+      scripts:
+        bootstrap-product: { file: scripts/bootstrap-product.sh, executable: true }
+        run-pipeline: { file: scripts/run-pipeline.sh, executable: true }
+        resume-pipeline: { file: scripts/resume-pipeline.py, executable: true }
+        daily-digest: { file: scripts/daily-digest.sh, executable: true }
+
+products:
+  expense-tracker:
+    status: in-development
+    phase: 1
+    sprint: 1  # Gestartet 2026-02-25
+    initialized_at: "2026-02-24"
+    config: products/expense-tracker/config.yaml
+
+    specs:
+      product-vision: { status: approved, file: products/expense-tracker/specs/product-vision.md }
+      mvp-scope: { status: approved, file: products/expense-tracker/specs/mvp-scope.md }
+      feature-beleg-capture: { status: approved, file: products/expense-tracker/specs/feature-beleg-capture.md }
+      feature-kategorien: { status: approved, file: products/expense-tracker/specs/feature-kategorien.md }
+      feature-steuer-export: { status: approved, file: products/expense-tracker/specs/feature-steuer-export.md }
+
+    personas:
+      file: products/expense-tracker/personas/variables.yaml
+      count: 6
+      status: approved
+
+    pipeline:
+      last_run: null
+      last_status: null
+      gates:
+        validate: pending
+        spec: pending
+        personas: pending
+        security: pending
+        a11y: pending
+        quality: pending
+        build: pending
+
+    next_action: "Phase 2 OCR starten — User-Feedback sammeln"
+    deployment:
+      platform: vercel
+      status: LIVE
+      url: https://expense-tracker-tan-five.vercel.app
+      deployed_at: "2026-02-26"
+      project: aisebastianraguseo-webs-projects/expense-tracker
+    blocking_issues: []
+    sprint_1_status:
+      started: "2026-02-25"
+      tests_passing: 30
+      files_created: 19
+      gates:
+        validate: GREEN
+        spec: GREEN
+        security: GREEN
+        a11y: PENDING_REVIEW
+        quality: PENDING_REVIEW
+
+metrics:
+  total_agents: 15
+  total_specs: 5
+  total_personas: 6
+  governance_files: 4
+  automation_scripts: 4
+
+self_healing:
+  auto_rollback:
+    enabled: true
+    error_threshold: 0.05  # 5%
+    window_minutes: 10
+  auto_regenerate:
+    enabled: true
+    max_retries: 3
+  auto_update_dependencies:
+    enabled: true
+    cve_auto_fix: true
+
+human_attention_log:
+  - date: "2026-02-24"
+    activity: "System-Initialisierung und Setup"
+    duration_minutes: 15
+    decisions_made: ["System-Architektur approved", "ExpenseTracker als erstes Produkt gewählt"]
+
+session_log:
+  - timestamp: "2026-02-24T00:00:00"
+    action: "System vollständig initialisiert"
+    phases_completed: [1, 2, 3, 4, 5]
+    products_initialized: ["expense-tracker"]
+    status: "ALL_COMPLETE"

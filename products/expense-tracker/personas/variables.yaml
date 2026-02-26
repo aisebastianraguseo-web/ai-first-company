@@ -1,0 +1,355 @@
+personas:
+  meta:
+    product_id: expense-tracker
+    version: "1.0"
+    created_by: persona-architect
+    total_count: 6
+    adversarial_count: 1
+    last_updated: "2026-02-24"
+
+  primary_users:
+
+    - name: Max Müller
+      id: max-freelance-dev
+      archetype: "Power User"
+      emoji: "👨‍💻"
+      role: "Freelance Software-Entwickler"
+      age: 32
+      location: "Berlin"
+      experience_level: "Tech-affin, digital native"
+
+      demographics:
+        income: "6.000–9.000 €/Monat (variabel)"
+        work_setup: "100% remote, home office"
+        expenses_per_month: 30–60
+        tax_situation: "Einzelunternehmer, EÜR, Steuerberater genutzt"
+
+      goals:
+        primary: "Ausgaben schnell tracken ohne Ablenkung vom Coding"
+        secondary: "Steuer-Unterlagen in < 10 Minuten vorbereiten"
+        tertiary: "Keine unnötigen Abos oder Cloud-Dienste"
+
+      pain_points:
+        - "Bisherige Apps zu komplex oder zu teuer"
+        - "Belege gehen verloren / vergessen zu fotografieren"
+        - "CSV-Exports von anderen Tools nicht Excel-kompatibel"
+        - "Datenschutz bei US-Cloud-Diensten"
+
+      behaviors:
+        device: "Primär Laptop, Smartphone für schnelle Captures"
+        workflow: "Sofort erfassen direkt nach Kauf"
+        frequency: "2-4 Ausgaben/Woche"
+        data_sensitivity: "Hoch — will keine Daten in Cloud"
+
+      technical_skills:
+        keyboard_shortcuts: true
+        pwa_install: true
+        browser_devtools: true
+        terminal: true
+
+      feature_priorities:
+        - "Schnelle Eingabe (< 30s)"
+        - "Privacy/Offline-first"
+        - "CSV-Export funktioniert mit Excel"
+        - "Kein Tracking"
+
+      key_quote: "Ich will eine App die aus dem Weg geht und einfach funktioniert."
+
+      test_scenarios:
+        - "Eingabe mit ausschließlich Tastatur (kein Maus)"
+        - "Export und Öffnen in Excel DE"
+        - "Überprüfung: Werden externe Requests gemacht?"
+
+    # ──────────────────────────────────────────────
+
+    - name: Lisa Hoffmann
+      id: lisa-designerin
+      archetype: "Visuelle Nutzerin"
+      emoji: "🎨"
+      role: "Freelance UX/UI Designerin"
+      age: 28
+      location: "München"
+      experience_level: "Tech-versiert, Design-fokussiert"
+
+      demographics:
+        income: "4.000–7.000 €/Monat"
+        work_setup: "Mix aus remote und Kunden-Büro"
+        expenses_per_month: 15–40
+        tax_situation: "Einzelunternehmer, nutzt Steuerberater"
+
+      goals:
+        primary: "App muss schön und intuitiv sein — wenn nicht, nutze ich sie nicht"
+        secondary: "Belege direkt mit Kamera scannen ohne Komplexität"
+        tertiary: "Alles auf einen Blick sehen können"
+
+      pain_points:
+        - "Hässliche oder unaufgeräumte UIs frustrieren sofort"
+        - "Kategorie-Auswahl zu langsam in anderen Apps"
+        - "Keine Möglichkeit Belege mit Notizen zu verknüpfen"
+        - "Vergisst oft Ausgaben nachzutragen"
+
+      behaviors:
+        device: "Primär iPhone, Figma auf MacBook"
+        workflow: "Foto sofort + Kategorie auswählen + fertig"
+        frequency: "Täglich 1-3 Ausgaben"
+        data_sensitivity: "Mittel"
+
+      technical_skills:
+        keyboard_shortcuts: false
+        pwa_install: true
+        design_tools: ["Figma", "Sketch"]
+        accessibility_awareness: true
+
+      feature_priorities:
+        - "Schönes, klares Design"
+        - "Schnelle Kamera-Funktion"
+        - "Klare Kategorie-Icons"
+        - "Beleg-Vorschau"
+
+      key_quote: "Wenn die App nicht schön ist, nutze ich sie keine 5 Minuten."
+
+      test_scenarios:
+        - "Erste Ausgabe ohne Anleitung erfassen"
+        - "Kamera-Funktion auf iPhone"
+        - "Dark Mode (falls vorhanden)"
+        - "Onboarding-Flow"
+
+      a11y_test:
+        color_perception: "Normal"
+        screen_size: "iPhone 14 Pro (390x844)"
+
+    # ──────────────────────────────────────────────
+
+    - name: Stefan Bauer
+      id: stefan-berater
+      archetype: "Effizienz-Maximierer"
+      emoji: "📊"
+      role: "Freelance Unternehmensberater"
+      age: 41
+      location: "Frankfurt"
+      experience_level: "Business-fokussiert, mittel tech-affin"
+
+      demographics:
+        income: "12.000–20.000 €/Monat"
+        work_setup: "Viel Reisen, Kunden-Standorte"
+        expenses_per_month: 80–150
+        tax_situation: "Komplexe Steuersituation, Steuerberater, ggf. GmbH-Überlegung"
+
+      goals:
+        primary: "Alle Reise- und Bewirtungskosten lückenlos dokumentieren"
+        secondary: "Monatlichen Überblick für sich und Steuerberater"
+        tertiary: "Auch unterwegs (offline) funktioniert"
+
+      pain_points:
+        - "Hohe Anzahl an Ausgaben macht manuelle Tools unbrauchbar"
+        - "Bewirtungskosten immer mit Zweck dokumentieren müssen"
+        - "Export muss absolut vollständig und fehlerfrei sein"
+        - "Will keine Zeit mit App-Bedienung verschwenden"
+
+      behaviors:
+        device: "Samsung Galaxy S24, Surface Laptop"
+        workflow: "Sofort erfassen, abends batch-review"
+        frequency: "5-10 Ausgaben/Tag bei Reise"
+        data_sensitivity: "Sehr hoch — Kundendaten + Finanzdaten"
+
+      technical_skills:
+        keyboard_shortcuts: false
+        excel_power_user: true
+        mobile_first: true
+
+      feature_priorities:
+        - "Schnelle Bulk-Erfassung"
+        - "Zweck-Feld bei Bewirtungskosten"
+        - "Vollständiger, fehlerfreier Export"
+        - "Offline-Funktionalität für Reisen"
+
+      key_quote: "Jede Minute die ich mit Buchhaltung verbringe ist eine Minute weniger für Kunden."
+
+      test_scenarios:
+        - "10 Ausgaben in Folge erfassen (Stress-Test)"
+        - "Offline-Nutzung (Flugzeug-Modus)"
+        - "Export für gesamtes Quartal"
+
+    # ──────────────────────────────────────────────
+
+    - name: Dr. Petra Weber
+      id: dr-weber-steuerberaterin
+      archetype: "Qualitäts-Prüferin"
+      emoji: "🧾"
+      role: "Steuerberaterin (Nutzerin des Exports)"
+      age: 52
+      location: "Hamburg"
+      experience_level: "Steuer-Experte, Tech-Laie"
+
+      demographics:
+        income: "nicht relevant (Dienstleisterin)"
+        work_setup: "Kanzlei + Home Office"
+        expenses_per_month: "Nicht Endnutzer der App"
+        tax_situation: "Empfängerin von Mandanten-Exporten"
+
+      goals:
+        primary: "Mandanten-Exports direkt in DATEV importierbar"
+        secondary: "Vollständige, fehlerfreie Daten ohne Rückfragen"
+        tertiary: "Standardisiertes Format dass sie sofort versteht"
+
+      pain_points:
+        - "Mandanten bringen Excel-Chaos statt strukturierter Daten"
+        - "Fehlende oder falsche Belege verzögern Jahresabschluss"
+        - "CSV-Encoding-Fehler (Umlaute) bei anderen Tools"
+        - "Fehlende Kategorisierung macht Zuordnung aufwändig"
+
+      requirements_for_csv:
+        - "UTF-8 mit BOM (Windows Excel öffnet sonst Umlaute falsch)"
+        - "Semikolon als Trennzeichen (DE-Standard)"
+        - "Datum: DD.MM.YYYY"
+        - "Betrag: Komma als Dezimaltrennzeichen"
+        - "Spalte: Steuerrelevant (Ja/Nein)"
+        - "Kategorie muss EÜR-Position erkennbar sein"
+
+      key_quote: "Wenn der Export stimmt, spare ich 3 Stunden pro Mandant pro Jahr."
+
+      test_scenarios:
+        - "CSV in Excel 2019 (Windows) öffnen"
+        - "Umlaute korrekt angezeigt?"
+        - "Alle Pflichtfelder vorhanden?"
+        - "Summen rechnerisch korrekt?"
+
+    # ──────────────────────────────────────────────
+
+    - name: Ingrid Schäfer
+      id: ingrid-tech-laie
+      archetype: "Gelegentliche Nutzerin"
+      emoji: "👩‍💼"
+      role: "Freelance Übersetzerin"
+      age: 58
+      location: "Stuttgart"
+      experience_level: "Tech-Laie, nutzt Smartphone hauptsächlich für Kommunikation"
+
+      demographics:
+        income: "2.500–4.500 €/Monat"
+        work_setup: "Home Office"
+        expenses_per_month: 5–15
+        tax_situation: "Kleinunternehmer nach §19 UStG, einfache Steuererklärung"
+
+      goals:
+        primary: "Einfach nur Ausgaben aufschreiben ohne Erklärung"
+        secondary: "Jahresübersicht für Steuererklärung"
+        tertiary: "Ohne Hilfe bedienen können"
+
+      pain_points:
+        - "Tech-Apps sind oft zu kompliziert"
+        - "Winzige Touch-Targets schwer zu treffen"
+        - "Zu viele Optionen überfordern"
+        - "Keine Brille dabei = Text muss groß sein"
+
+      behaviors:
+        device: "iPhone SE (kleines Display), iPad selten"
+        workflow: "Am Ende des Monats alle Ausgaben nachtragen"
+        frequency: "Einmal im Monat batch"
+        data_sensitivity: "Niedrig"
+
+      technical_skills:
+        keyboard_shortcuts: false
+        touch_accuracy: "Niedrig"
+        reading_speed: "Langsam bei kleinem Text"
+
+      accessibility_needs:
+        font_size: "Bevorzugt große Schrift (min 16px)"
+        touch_targets: "Min 48x48px bevorzugt"
+        cognitive_load: "Niedrig halten — max 3 Schritte pro Aufgabe"
+        error_recovery: "Klare Fehlermeldungen mit Lösung"
+
+      feature_priorities:
+        - "Maximale Einfachheit"
+        - "Große, klare Buttons"
+        - "Verständliche Fehlermeldungen"
+        - "Kein technischer Jargon"
+
+      key_quote: "Wenn ich eine App dreimal probiere und es nicht klappt, lösche ich sie."
+
+      test_scenarios:
+        - "Erste Ausgabe ohne jede Anleitung"
+        - "Fehler machen und Korrektur finden"
+        - "App auf iPhone SE mit iOS-Schriftgröße 'Groß'"
+        - "Onboarding: Wie lange bis zur ersten gespeicherten Ausgabe?"
+
+      a11y_test:
+        font_scale: 1.3
+        screen_size: "iPhone SE (375x667)"
+        touch_target_check: true
+
+    # ──────────────────────────────────────────────
+
+  adversarial_users:
+
+    - name: Hacker Hans
+      id: hacker-hans
+      archetype: "Adversarial Tester"
+      emoji: "🔓"
+      role: "Security-Tester / Angreifer"
+      age: "Unbekannt"
+      location: "Unbekannt"
+      motivation: "Schwachstellen finden, Daten extrahieren, App missbrauchen"
+
+      threat_model:
+        attacker_type: "Opportunistischer Angreifer"
+        skill_level: "Mittel bis Hoch"
+        access_level: "Nur Browser (kein Server-Zugriff in Phase 1)"
+        motivation: "Datenzugriff, App-Manipulation, DoS"
+
+      attack_vectors:
+        input_manipulation:
+          - "XSS über Beschreibungs-Feld: <script>alert('xss')</script>"
+          - "XSS über Dateiname: <img src=x onerror=alert(1)>.jpg"
+          - "Sehr langer Input (10.000 Zeichen) in allen Feldern"
+          - "Negative Beträge, NaN, Infinity, NULL"
+          - "SQL-Injection-Versuche (irrelevant in Phase 1, aber testen)"
+          - "Emoji-Injection in Kategorienamen"
+
+        file_upload_attacks:
+          - "XXXXXXXXXX.exe.jpg (doppelte Extension)"
+          - "Manipuliertes JPEG mit eingebettetem Script"
+          - "10GB Datei (tar bomb)"
+          - "SVG mit eingebettetem JavaScript"
+          - "PDF mit JavaScript"
+          - "0-Byte-Datei"
+          - "Datei mit falscher MIME-Type im Header"
+
+        storage_attacks:
+          - "LocalStorage manuell manipulieren (Browser DevTools)"
+          - "IndexedDB manipulieren"
+          - "Storage-Quota erschöpfen (5-10MB Limit)"
+          - "Circular Reference in JSON"
+
+        ui_attacks:
+          - "Rapid clicking (Double Submit)"
+          - "Browser-Zurück nach Speichern"
+          - "Tab-Switching während Upload"
+          - "App offline schalten mitten im Export"
+
+        export_attacks:
+          - "CSV-Injection: =cmd|' /C calc'!A0 als Beschreibung"
+          - "Formel-Injection in Kategorienamen"
+          - "Sonderzeichen: ;,\"'\\n\\r in allen Feldern"
+
+      expected_outcomes:
+        - "XSS: Kein Script wird ausgeführt — HTML wird escaped"
+        - "File Upload: Ungültige Dateien werden abgelehnt mit klarer Meldung"
+        - "Storage Manipulation: App zeigt Fehler, crashed nicht"
+        - "Double Submit: Nur eine Ausgabe wird gespeichert"
+        - "CSV-Injection: Gefährliche Zeichen werden quoted/escaped"
+        - "DoS: App bleibt responsiv, zeigt Fehler, logged nicht ab"
+
+      security_gate_requirements:
+        critical: 0  # Kein CRITICAL darf bestehen
+        high: 0      # Kein HIGH vor Deploy
+        medium: "Dokumentiert + Sprint-Planung"
+        low: "Backlog"
+
+      reference: "../../agents/specialized/security-challenger.md"
+
+      test_protocol:
+        1_manual: "Manuelle Tests aller Attack Vectors"
+        2_automated: "OWASP ZAP Baseline-Scan (Phase 2 wenn Server)"
+        3_review: "Code-Review durch security-challenger.md"
+        4_gate: "Security Gate muss GREEN sein"

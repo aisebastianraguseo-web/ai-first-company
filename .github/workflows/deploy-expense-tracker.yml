@@ -1,0 +1,178 @@
+name: Deploy ExpenseTracker → Vercel
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'products/expense-tracker/app/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'products/expense-tracker/app/**'
+  workflow_dispatch:
+
+env:
+  PRODUCT_DIR: products/expense-tracker/app
+  NODE_VERSION: '20'
+
+jobs:
+  # ── Tests ────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run ExpenseService tests
+        run: node ${{ env.PRODUCT_DIR }}/tests/expenses.test.js
+
+      - name: Run ExporterService tests
+        run: node ${{ env.PRODUCT_DIR }}/tests/export.test.js
+
+  # ── Security Check ───────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Checking for hardcoded credentials..."
+          if grep -rn \
+            -e 'password\s*=\s*['"'"'"][^'"'"'"]\+['"'"'"]' \
+            -e 'api_key\s*=\s*['"'"'"][^'"'"'"]\+['"'"'"]' \
+            -e 'secret\s*=\s*['"'"'"][^'"'"'"]\+['"'"'"]' \
+            ${{ env.PRODUCT_DIR }}/js/ 2>/dev/null; then
+            echo "ERROR: Possible hardcoded secrets found!"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets found"
+
+      - name: Verify Content-Security-Policy in vercel.json
+        run: |
+          echo "Checking CSP in vercel.json..."
+          if grep -q "Content-Security-Policy" ${{ env.PRODUCT_DIR }}/vercel.json; then
+            echo "✅ CSP header present"
+          else
+            echo "ERROR: No Content-Security-Policy found in vercel.json"
+            exit 1
+          fi
+
+      - name: Check for http:// (non-TLS) URLs in source
+        run: |
+          if grep -rn "http://" ${{ env.PRODUCT_DIR }}/js/ 2>/dev/null | \
+             grep -v "localhost\|127\.0\.0\.1\|example\.com\|schemas\."; then
+            echo "⚠️  WARNING: Non-HTTPS URLs found in JS source"
+          else
+            echo "✅ No insecure HTTP URLs"
+          fi
+
+  # ── Accessibility Check ──────────────────────────────────
+  a11y:
+    name: Accessibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check ARIA labels in HTML
+        run: |
+          echo "Checking accessibility attributes..."
+          ISSUES=0
+
+          # Check for images without alt
+          IMG_NO_ALT=$(grep -c '<img[^>]*>' ${{ env.PRODUCT_DIR }}/index.html 2>/dev/null || echo 0)
+          IMG_WITH_ALT=$(grep -c 'alt=' ${{ env.PRODUCT_DIR }}/index.html 2>/dev/null || echo 0)
+          echo "  Images: $IMG_NO_ALT total, $IMG_WITH_ALT with alt"
+
+          # Check for main landmark
+          if grep -q 'role="main"\|<main' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ main landmark present"
+          else
+            echo "  ⚠️  No main landmark"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          # Check for nav landmark
+          if grep -q 'role="navigation"\|<nav' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ navigation landmark present"
+          fi
+
+          # Check for skip link
+          if grep -q 'skip\|Hauptinhalt' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ skip navigation link present"
+          else
+            echo "  ⚠️  No skip link found"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          # Check for lang attribute
+          if grep -q '<html.*lang=' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ lang attribute on <html>"
+          else
+            echo "  ERROR: Missing lang attribute on <html>"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          echo ""
+          if [ $ISSUES -eq 0 ]; then
+            echo "✅ A11y checks passed"
+          else
+            echo "⚠️  $ISSUES A11y issues found (non-blocking for deploy)"
+          fi
+
+  # ── Deploy Preview (PRs) ─────────────────────────────────
+  deploy-preview:
+    name: Deploy Preview
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy Preview to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token:   ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id:  ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ${{ env.PRODUCT_DIR }}
+          vercel-args: '--yes'
+
+  # ── Deploy Production (main branch) ─────────────────────
+  deploy-production:
+    name: Deploy Production
+    needs: [test, security, a11y]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    environment:
+      name: production
+      url: https://expense-tracker.vercel.app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token:   ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id:  ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ${{ env.PRODUCT_DIR }}
+          vercel-args: '--prod --yes'
+
+      - name: Post-deploy notification
+        run: |
+          echo "🚀 ExpenseTracker deployed to production"
+          echo "URL: https://expense-tracker.vercel.app"
+          echo "Tests: PASSED"
+          echo "Security: PASSED"

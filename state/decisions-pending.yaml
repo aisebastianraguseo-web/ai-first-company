@@ -1,0 +1,130 @@
+meta:
+  last_updated: "2026-02-25"
+  total_pending: 0
+  total_resolved: 3
+
+pending_decisions:
+
+  - id: DEC-001
+    status: resolved
+    resolution: "JA — Sprint 1 gestartet (Vanilla JS, Offline-first)"
+    resolved_at: "2026-02-25"
+    priority: HIGH
+    created_at: "2026-02-24"
+    due_by: null
+    category: "BATCH_APPROVAL"
+    product: expense-tracker
+
+    title: "Sprint 1 freigeben — Implementierung beginnen"
+
+    context: >
+      Das ExpenseTracker-System ist vollständig spezifiziert:
+      - 5 Specs (Vision, MVP-Scope, 3 Features) sind APPROVED
+      - 6 Personas definiert (inkl. Hacker Hans)
+      - 4 Governance-Dateien aktiv
+      - Alle Agents bereit
+
+    question: "Soll Sprint 1 der ExpenseTracker-Implementierung jetzt beginnen?"
+
+    options:
+      - label: "JA — Sprint 1 starten"
+        description: "Implementation beginnt. Agents arbeiten autonom an: PWA-Grundstruktur, Beleg-Capture-Form, Kategorien-System."
+        autonomy_level: FULL  # Keine weiteren Approvals nötig bis Quality Gate
+
+      - label: "NEIN — Weitere Specs zuerst"
+        description: "Vor dem Code weitere Spezifikationen ausarbeiten (z.B. UI-Wireframes, API-Design für Phase 2)."
+
+      - label: "NEIN — Anderen Stack wählen"
+        description: "Alternativer Stack erwünscht (z.B. React, Svelte, Next.js statt Vanilla JS)."
+
+    recommendation: >
+      Empfehle JA. Vanilla JS für Phase 1 ist optimal (keine Build-Toolchain, direktes Deployment).
+      Alle Gates sind definiert und werden automatisch vor Deployment geprüft.
+
+    agents_to_notify_on_decision:
+      - agents/meta/product-bootstrapper.md
+      - agents/meta/task-splitter.md
+
+  # ──────────────────────────────────────────────
+
+  - id: DEC-002
+    status: resolved
+    resolution: "Vercel (Hobby-Plan) — expense-tracker.vercel.app"
+    resolved_at: "2026-02-25"
+    priority: MEDIUM
+    created_at: "2026-02-24"
+    due_by: null
+    category: "BATCH_APPROVAL"
+    product: expense-tracker
+
+    title: "PWA Deployment-Ziel festlegen"
+
+    context: >
+      ExpenseTracker Phase 1 ist clientseitig (kein Backend).
+      Für die PWA muss ein HTTPS-Endpunkt vorhanden sein.
+
+    question: "Wo soll ExpenseTracker Phase 1 deployed werden?"
+
+    options:
+      - label: "GitHub Pages (kostenlos)"
+        description: "raguseos.github.io/expense-tracker — kostenlos, HTTPS, automatisches Deployment via GitHub Actions"
+
+      - label: "Vercel (kostenlos Hobby-Plan)"
+        description: "expense-tracker.vercel.app — CI/CD integriert, Preview-Deployments, sehr einfaches Setup"
+
+      - label: "Netlify (kostenlos Starter)"
+        description: "Ähnlich wie Vercel, Form-Handling falls später benötigt"
+
+      - label: "Lokal only (kein Deployment)"
+        description: "Nur lokale Entwicklung, kein öffentliches Deployment in Phase 1"
+
+    recommendation: >
+      Empfehle Vercel für schnellstes Setup bei Zero-Config für statische Apps.
+      GitHub Pages als solide Alternative wenn bereits GitHub-Workflow bevorzugt.
+
+  # ──────────────────────────────────────────────
+
+  - id: DEC-003
+    status: resolved
+    resolution: "OCR + Auto-Kategorisierung zuerst — Phase 2 Sprint 1"
+    resolved_at: "2026-02-25"
+    priority: LOW
+    created_at: "2026-02-24"
+    due_by: null
+    category: "HUMAN_REQUIRED"
+    product: expense-tracker
+
+    title: "Phase 2 Feature-Priorisierung (KI-Kategorisierung)"
+
+    context: >
+      Phase 2 ist für nach dem MVP geplant.
+      Die zwei teuersten Features sind:
+      1. OCR + Auto-Kategorisierung (KI-API notwendig)
+      2. Cloud-Sync (Backend notwendig)
+
+    question: "Welches Phase-2-Feature hat höhere Priorität?"
+
+    options:
+      - label: "OCR + Auto-Kategorisierung zuerst"
+        description: "Hauptwert-Treiber für Zeit-Ersparnis. Braucht KI-API (OpenAI, Google Vision, oder lokal via WASM). Kosten: ~0.01$/Beleg."
+
+      - label: "Cloud-Sync zuerst"
+        description: "Multi-Device-Sync. Braucht Backend (Supabase, Firebase, oder eigener Server). Kosten: abhängig von Nutzerzahl."
+
+      - label: "Beides parallel (mehr Resources nötig)"
+        description: "Schnellster Weg zu Phase 2 Complete, aber mehr Parallelarbeit und höhere Komplexität."
+
+    recommendation: >
+      Empfehle OCR zuerst — höchster User-Value für Einzelnutzer ohne Backend-Komplexität.
+      Cloud-Sync kann auch lokal durch manuelles CSV-Backup gehandhabt werden.
+
+resolved_decisions: []
+
+decision_routing:
+  BATCH_APPROVAL:
+    collect_until: "Ende der Woche ODER 5 Entscheidungen gesammelt"
+    presentation: "Einmal vorlegen, gebündelt entscheiden"
+
+  HUMAN_REQUIRED:
+    notification: "Sofort — blockiert Fortschritt"
+    escalation_after_days: 3
