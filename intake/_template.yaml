@@ -1,0 +1,65 @@
+# ============================================================
+# PRODUCT INTAKE TEMPLATE — Fülle diese Datei aus, dann:
+#   bash scripts/build-product.sh intake/<dein-produkt>.yaml
+#
+# Status-Werte: idea | ready | building | done | archived
+# ============================================================
+
+product:
+  id: "my-product"          # kebab-case: "company-dashboard", "budget-planner"
+  name: "My Product"        # Anzeigename für den User
+  status: "idea"            # idea | ready | building | done | archived
+
+vision:
+  # Wer nutzt das Produkt? (Berufe, Kontext, Verhalten — 2-4 Sätze)
+  target_users: |
+    Beispiel: Freelancer und kleine Agenturen (2-10 Personen) die mehrere
+    Kundenprojekte gleichzeitig managen. Tech-affin, arbeiten am Mac,
+    haben wenig Zeit für Tool-Onboarding.
+
+  # Was ist das EINE zentrale Problem? (1-3 Sätze, konkret)
+  core_problem: |
+    Beispiel: Sie verlieren den Überblick welche Aufgaben welchem Projekt
+    gehören und wie viel Zeit sie noch haben. Spreadsheets sind zu schwerfällig,
+    teure Tools zu komplex.
+
+  # Was macht es besser als Alternativen? (1-2 Sätze)
+  value_proposition: |
+    Beispiel: Kein Onboarding, kein Account — Browser auf, losarbeiten.
+    Offline-first, Daten bleiben lokal.
+
+mvp_features:
+  # 3-5 absolut notwendige Features (P0). Ohne diese ist das Produkt wertlos.
+  - name: "Feature 1"
+    description: "Was der Nutzer damit tun kann — aus User-Perspektive"
+  - name: "Feature 2"
+    description: "Was der Nutzer damit tun kann"
+  - name: "Feature 3"
+    description: "Was der Nutzer damit tun kann"
+  # - name: "Feature 4"
+  #   description: "Optional — nur wenn wirklich P0"
+
+data:
+  # Woher kommen die Daten? Wähle die zutreffende Option:
+  source: "localStorage"    # localStorage | external-api | user-input-only | file-import
+  description: |
+    Beispiel: Nutzer gibt Daten manuell ein. Gespeichert in localStorage.
+    Kein Server, kein Account nötig.
+
+infrastructure:
+  backend_needed: false     # true = Cloud-Sync, Auth, DB nötig
+  backend_description: ""   # Nur wenn backend_needed: true
+  # Beispiel: "User-Auth (Email/Passwort) + Postgres DB für Sync"
+
+constraints:
+  out_of_scope:             # Was soll es EXPLIZIT NICHT können?
+    - "Kein Beispiel-Feature"
+    - "Keine externe Integration in Phase 1"
+  technical: "Vanilla JS, kein Framework, kein Build-Step, offline-first"
+  data_sensitivity: "low"   # low | medium | high (beeinflusst Security-Level)
+
+success_metrics:
+  # Woran erkennst du dass das MVP gut ist? Konkret messbar.
+  - "Kernaufgabe in <30 Sekunden erledigt"
+  - "Funktioniert offline"
+  - "Kein Onboarding nötig — sofort verständlich"

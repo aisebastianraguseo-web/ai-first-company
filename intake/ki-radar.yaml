@@ -1,0 +1,44 @@
+product:
+  id: "ki-radar"
+  name: "KI-Radar"
+  status: "ready"           # idea | ready | building | done | archived
+
+vision:
+  target_users: |
+    Innovationsmanager, IT- und Technologieentscheider in Unternehmen, die den Überblick über die rasante Entwicklung von KI behalten müssen. Sie arbeiten in technologiegetriebenen Umfeldern und benötigen schnell verwertbare Zusammenfassungen relevanter Neuerungen.
+  core_problem: |
+    Die Geschwindigkeit der KI-Entwicklung ist extrem hoch und für einzelne Unternehmen kaum überschaubar. Wichtige neue Modelle, Agenten-Features und Technologien gehen in der Fülle an Informationen unter, und es fehlt eine strukturierte Übersicht, welche Innovationen tatsächlich relevant sind.
+  value_proposition: |
+    Statt manuellem News-Jagd und Hype-Verfolgung liefert der KI-Radar automatisch gefilterte Erkenntnisse: Er sammelt Daten aus offiziellen Release-Notes, GitHub, ArXiv und Venture-News und bewertet neue KI-Funktionen nach ihrem praktischen Nutzen. Entscheider erhalten sofort verständliche Empfehlungen, welche Entwicklungen ihre aktuellen Problemstellungen lösen können.
+
+mvp_features:
+  - name: "Automatische Quellenaggregation"
+    description: "Nutzer erhält einen konsolidierten Feed mit den neuesten KI-Updates aus offiziellen Release-Notes, GitHub-Repositories, Forschungsarchiven und Branchennews."
+  - name: "Fähigkeiten-Analyse & Visualisierung"
+    description: "Das System analysiert neue Inhalte auf zentrale Capability-Sprünge (z.B. Autonomie-Stufen, Speicherfunktionen, API-Integrationen) und visualisiert diese in einer übersichtlichen Landkarte."
+  - name: "Problem-Matching Dashboard"
+    description: "Nutzer definiert unternehmensspezifische Problemklassen und sieht direkt, welche neuen KI-Fähigkeiten diese Probleme effizienter lösen könnten. Die Plattform stellt Verknüpfungen zwischen Entwicklungen und konkreten Anwendungsfällen dar."
+  - name: "Benachrichtigungs-System"
+    description: "Bei relevanten Neuerungen zu vordefinierten Themen oder Problemfeldern erhalten Nutzer automatisierte Alerts (z.B. per E-Mail oder App-Benachrichtigung), um schnell reagieren zu können."
+
+data:
+  source: "external-api"
+  description: |
+    Die Daten stammen aus öffentlich zugänglichen Quellen: Offizielle Release-Notes und API-Updates großer KI-Anbieter (OpenAI, Google, Anthropic u.a.), GitHub-Repositories (Trendprojekte und neue Modelldemos), ArXiv-Forschungsabstrakte und Branchenpublikationen (VC-Blogs, Crunchbase). Der Nutzer muss keine Daten manuell eingeben; alles wird automatisiert bezogen.
+
+infrastructure:
+  backend_needed: true
+  backend_description: "Cloud-basierter Microservice-Stack mit Datenbank und LLM-Integration. Beispielsweise Node.js/Python-Services zum Aggregieren von Quellen, PostgreSQL/ElasticSearch zur Speicherung, sowie LLM-APIs für Analyse und Mapping."
+
+constraints:
+  out_of_scope:
+    - "Keine generische Chatbot- oder Assistenzfunktion (fokussiert rein auf Trend- und Fähigkeitsanalyse)"
+    - "Kein eigenständiges Modelltraining oder generative KI-Ausgabe (nur Analyse und Empfehlungen)"
+    - "Keine direkte Integration mit Drittservices in MVP-Phase"
+  technical: "Cloud-native Microservices (z.B. AWS/GCP), modernes Web-Frontend (React/Vue). Fokus auf Datensicherheit (Sandboxes) und schnelle Echtzeit-Updates."
+  data_sensitivity: "medium"
+
+success_metrics:
+  - "Relevante KI-Neuerungen werden im Schnitt <24 Stunden nach Veröffentlichung erkannt"
+  - "Mindestens 80 % der Nutzer bewerten die bereitgestellten Insights als hilfreich"
+  - "Die Kernaufgabe (Erkennung einer relevanten KI-Innovation) kann in <5 Minuten abgeschlossen werden"
