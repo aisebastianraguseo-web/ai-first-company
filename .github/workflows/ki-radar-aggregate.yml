@@ -1,0 +1,53 @@
+name: KI-Radar — Daily Aggregation
+
+on:
+  schedule:
+    # Runs at 06:00 UTC daily (08:00 CET, before German workday starts)
+    - cron: '0 6 * * *'
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual run'
+
+jobs:
+  aggregate:
+    name: Aggregate AI Updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger aggregation endpoint
+        run: |
+          RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST "${{ secrets.KI_RADAR_URL }}/api/aggregate" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+
+          echo "HTTP Status: $RESPONSE"
+          cat /tmp/response.json
+
+          # Fail if not 200 or 207 (207 = partial success)
+          if [ "$RESPONSE" != "200" ] && [ "$RESPONSE" != "207" ]; then
+            echo "Aggregation failed with status $RESPONSE"
+            exit 1
+          fi
+
+          # Log results
+          INSERTED=$(cat /tmp/response.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('inserted', 0))")
+          TAGGED=$(cat /tmp/response.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tagged', 0))")
+          MATCHES=$(cat /tmp/response.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('matches', 0))")
+
+          echo "Results: inserted=$INSERTED tagged=$TAGGED matches=$MATCHES"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Aggregation job failed. Check Vercel logs at ${{ secrets.KI_RADAR_URL }}"
+          # V2: Slack/email notification here
+
+# Required GitHub Secrets (Settings → Secrets → Actions):
+# KI_RADAR_URL  — e.g. https://ki-radar.vercel.app
+# CRON_SECRET   — same value as CRON_SECRET in Vercel env vars

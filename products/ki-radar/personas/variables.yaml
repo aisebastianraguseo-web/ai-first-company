@@ -1,0 +1,384 @@
+# Auto-generiert von Persona Architect
+# Produkt: KI-Radar
+# Generiert: 2026-02-27
+
+personas:
+
+  # ── PILLAR 1: THE EFFICIENCY DRIVER ──────────────────────────────────
+  - id: markus
+    name: "Markus"
+    emoji: "⚡"
+    archetype: "Efficiency Driver"
+    role: "Head of Innovation, Großkonzern (Automotive)"
+    age: 41
+    tech_level: 4
+    time_pressure: 1          # extremer Zeitdruck
+    domain_expertise: 4
+
+    biography: >
+      Markus leitet ein 12-köpfiges Innovationsteam bei einem deutschen Automobilhersteller.
+      Er muss wöchentlich dem Vorstand einen KI-Briefing geben und hat keine Zeit für
+      stundenlange Research-Sessions. Er kennt die wichtigsten KI-Modelle beim Namen und
+      will sofort den strategischen Impakt sehen — keine Basics.
+
+    primary_goals:
+      - "In 5 Minuten wissen, was diese Woche in KI wirklich wichtig war"
+      - "Konkrete Empfehlungen für das eigene Unternehmen ableiten können"
+      - "Keine irrelevanten Meldungen sehen (Signal, kein Rauschen)"
+
+    pain_points:
+      - "Muss täglich 20+ Newsletter, Twitter-Feeds und LinkedIn-Posts durchforsten"
+      - "Hype von echtem Durchbruch unterscheiden kostet Zeit und Expertise"
+      - "Keine einheitliche Quelle die Modell-Releases, Research UND Business-News aggregiert"
+
+    mental_model: >
+      Denkt in Relevanz-Filtern: 'Was bedeutet das für unsere Roadmap?'
+      Sucht Muster über mehrere Monate, nicht einzelne Meldungen.
+
+    success_scenario: >
+      Montag 7:45 Uhr: öffnet KI-Radar, sieht 3 hoch-relevante Updates mit
+      Business-Impact-Einschätzung. Leitet zwei Aktionen ab, schließt den Tab.
+
+    failure_scenario: >
+      System zeigt 40 unpriorisierte Meldungen — Markus verbringt 30 Minuten
+      mit Filtern und deinstalliert nach der dritten solchen Session.
+
+    key_quotes:
+      - '"Ich brauche Executive Summary, kein Tech-Deep-Dive."'
+      - '"Wenn es in meine Top-3 gehört, will ich es. Sonst nicht."'
+
+    accessibility_needs:
+      - "Keine besonderen Anforderungen — nutzt Desktop-Chrome im Dark Mode"
+
+    security_risks:
+      - "Teilt Screenshots aus dem System in internen Slack — könnte sensible Unternehmens-Problemfelder leaken"
+      - "Nutzt Single Sign-On via Microsoft — Session-Hijacking durch schwache Token-Validierung möglich"
+
+    devices:
+      - "MacBook Pro 14', Chrome 120+"
+      - "iPad Pro (Meetings)"
+
+    focus_features:
+      - "Automatische Quellenaggregation"
+      - "Problem-Matching Dashboard"
+      - "Benachrichtigungs-System"
+
+    risk_factor: 2
+    logic_challenge: "Wie stellt das System sicher, dass 'Relevanz' wirklich unternehmens-spezifisch ist und nicht generisch?"
+    challenge_priority: 3
+
+  # ── PILLAR 2: THE SIMPLICITY SEEKER ──────────────────────────────────
+  - id: andrea
+    name: "Andrea"
+    emoji: "🧭"
+    archetype: "Simplicity Seeker"
+    role: "IT-Abteilungsleiterin, Mittelstand (Maschinenbau)"
+    age: 52
+    tech_level: 2
+    time_pressure: 2
+    domain_expertise: 3
+
+    biography: >
+      Andrea leitet die IT in einem 800-Personen-Maschinenbauunternehmen. KI ist für sie
+      ein wichtiges Thema das sie verstehen muss, aber sie ist keine KI-Spezialistin.
+      Sie hat eine Ausbildung in Wirtschaftsinformatik, nutzt aber kaum Social Media
+      und ist skeptisch gegenüber Hype. Ihr Vorgesetzter hat ihr gesagt: 'Behalte KI im Blick.'
+
+    primary_goals:
+      - "Verstehen was die wichtigsten KI-Entwicklungen in ihrer Branche bedeuten"
+      - "Ihrem Vorgesetzten monatlich einen verständlichen Status-Bericht liefern"
+      - "Nicht überwältigt werden von Fachjargon und Tech-Buzzwords"
+
+    pain_points:
+      - "Artikel auf TechCrunch und ArXiv sind für sie zu technisch"
+      - "Weiß nicht, welchen KI-Themen sie folgen soll — zu viel Auswahl"
+      - "Hat Angst, wichtige Entwicklungen zu verpassen die ihren Job betreffen"
+
+    mental_model: >
+      Denkt in Anwendungsfällen: 'Kann ich das in unserem Unternehmen einsetzen?'
+      Braucht Kontext und Erklärungen, keine rohen Daten.
+
+    success_scenario: >
+      Freitagnachmittag: öffnet KI-Radar, sieht 5 relevante Updates mit klaren
+      deutschen Erklärungen und einer 'Was das für Maschinenbau bedeutet'-Sektion.
+      Kopiert die Zusammenfassung in ihre monatliche E-Mail.
+
+    failure_scenario: >
+      Dashboard zeigt technische Capability-Maps die sie nicht versteht.
+      Schreibt an die IT-Hotline, erhält keine Hilfe, kehrt zu manuellen Newslettern zurück.
+
+    key_quotes:
+      - '"Was bedeutet das konkret für mein Unternehmen?"'
+      - '"Ich brauche keine Diagramme, ich brauche Sätze die ich weiterschicken kann."'
+
+    accessibility_needs:
+      - "Bevorzugt größere Schrift (mindestens 16px body)"
+      - "Hoher Kontrast bei Datenvisualisierungen — hat leichte Farbschwäche (Rot-Grün)"
+
+    security_risks:
+      - "Speichert Login-Daten im Browser-Passwortmanager auf Firmen-PC — geteilter Account möglich"
+      - "Könnte versehentlich interne Problemfelder öffentlich sichtbar machen falls ACL nicht korrekt"
+
+    devices:
+      - "Windows-PC, Firefox 115 (Firmenpolicy)"
+      - "Android Smartphone (privat)"
+
+    focus_features:
+      - "Fähigkeiten-Analyse & Visualisierung"
+      - "Benachrichtigungs-System"
+
+    risk_factor: 3
+    logic_challenge: "Sind die Erklärungen wirklich für Non-Experts verständlich, oder nur für Menschen die KI schon kennen?"
+    challenge_priority: 4
+
+  # ── PILLAR 3: THE RELIABLE PROFESSIONAL ──────────────────────────────
+  - id: stefan
+    name: "Stefan"
+    emoji: "🔬"
+    archetype: "Reliable Professional"
+    role: "CTO / Chief Architect, B2B SaaS Scale-Up"
+    age: 38
+    tech_level: 5
+    time_pressure: 2
+    domain_expertise: 5
+
+    biography: >
+      Stefan ist CTO eines 150-Personen SaaS-Unternehmens im HR-Tech Bereich.
+      Er folgt der KI-Entwicklung sehr genau, liest ArXiv-Papers, kennt die meisten
+      Modell-Benchmarks und hat ein klares Bild davon, welche Capabilities für sein
+      Produkt relevant sind. Er sucht einen strukturierten Überblick der seine eigene
+      Research ergänzt — keine Grundlagen-Erklärungen.
+
+    primary_goals:
+      - "Systematisch tracken welche neuen Capabilities seine Produktroadmap beeinflussen"
+      - "Benchmarks und technische Details zu neuen Modellen schnell finden"
+      - "Frühzeitig API-Changes und Deprecations mitbekommen"
+
+    pain_points:
+      - "Verpasst regelmäßig relevante API-Breaking-Changes bis es zu spät ist"
+      - "Kein Tool fasst Research, Release-Notes UND VC-Funding-News zusammen"
+      - "Bestehende Newsletter sind zu shallow — er will Tiefe, keine Zusammenfassung"
+
+    mental_model: >
+      Denkt in Capability-Graphen: 'Welche neue Fähigkeit löst welches technische Problem?'
+      Vergleicht Modelle systematisch, trackt Fortschritt über Zeit.
+
+    success_scenario: >
+      Erhält täglich einen kompakten Feed mit technischen Details zu neuen Modellen,
+      API-Changes und relevanten Papers — gefiltert auf HR-Tech Use Cases.
+      Kann direkt in die Original-Quelle (ArXiv, GitHub, Release-Notes) springen.
+
+    failure_scenario: >
+      System erklärt Basics die er schon weiß. Kein Link zu Original-Quellen.
+      Zu viele Business-Artikel, zu wenig technische Substanz. Kündigt nach 2 Wochen.
+
+    key_quotes:
+      - '"Zeig mir die Benchmark-Tabelle, nicht den Marketing-Text."'
+      - '"Ich brauche den Link zum Original-Paper, nicht deine Zusammenfassung davon."'
+
+    accessibility_needs:
+      - "Keine besonderen Anforderungen — Tech-affin, nutzt alle Geräte problemlos"
+
+    security_risks:
+      - "Wird API-Schlüssel für Benachrichtigungs-Integrations direkt in der URL angeben — müssen serverseitig validiert werden"
+      - "Könnte System mit sehr spezifischen Suchfiltern für Competitive Intelligence nutzen — Terms-of-Service-Grauzone"
+
+    devices:
+      - "MacBook Pro, Safari + Chrome"
+      - "iPhone 15 Pro"
+
+    focus_features:
+      - "Automatische Quellenaggregation"
+      - "Fähigkeiten-Analyse & Visualisierung"
+      - "Problem-Matching Dashboard"
+
+    risk_factor: 2
+    logic_challenge: "Wie tief geht die technische Detailtiefe? Werden ArXiv-Abstracts vollständig indexiert oder nur Metadaten?"
+    challenge_priority: 2
+
+  # ── PILLAR 4: THE CRITICAL SCEPTIC ───────────────────────────────────
+  - id: petra
+    name: "Petra"
+    emoji: "🔍"
+    archetype: "Critical Sceptic"
+    role: "Chief Digital Officer (CDO), Versicherungskonzern"
+    age: 47
+    tech_level: 3
+    time_pressure: 2
+    domain_expertise: 4
+
+    biography: >
+      Petra ist CDO bei einem deutschen Versicherungskonzern mit 8.000 Mitarbeitern.
+      Sie hat zu viele KI-Hype-Wellen miterlebt und ist grundsätzlich skeptisch.
+      Bevor sie ein Tool in ihrem Konzern einsetzt, will sie wissen: Woher kommen die Daten?
+      Wie wird Qualität sichergestellt? Was passiert wenn Daten falsch sind?
+      Sie hat Compliance-Anforderungen (DSGVO, BaFin) die jedes neue Tool erfüllen muss.
+
+    primary_goals:
+      - "Fundierte Entscheidungen treffen — kein Hype-Driven Decision Making"
+      - "Sicherstellen dass das Tool DSGVO- und BaFin-konform eingesetzt werden kann"
+      - "Nachvollziehbarkeit: Woher kommt ein Insight, wie wurde er bewertet?"
+
+    pain_points:
+      - "Kann nicht bewerten ob die KI-Einschätzungen des Tools zuverlässig sind"
+      - "Keine Transparenz über Datenquellen und deren Qualität"
+      - "Angst vor Fehlinformation die als 'KI-Insight' verpackt ist"
+
+    mental_model: >
+      Denkt in Risiken und Nachweisen: 'Womit belege ich, dass diese Entscheidung richtig war?'
+      Braucht Audit-Trails und klare Quellenangaben.
+
+    success_scenario: >
+      Jede Einschätzung im System zeigt: Quelle, Datum, Confidence-Score, Link zum Original.
+      Petra kann jede Aussage reproduzieren und ihrem Compliance-Team vorlegen.
+
+    failure_scenario: >
+      System zeigt 'KI bewertet: HIGH RELEVANCE' ohne Begründung. Petra kann die Aussage
+      nicht verifizieren. Lässt Einführung durch Legal-Abteilung stoppen.
+
+    key_quotes:
+      - '"Woher weiß das System das? Zeig mir die Quelle."'
+      - '"Ich brauche Nachvollziehbarkeit, keine Magie."'
+
+    accessibility_needs:
+      - "Nutzt Text-to-Speech gelegentlich wegen Augenproblemen (langer Bildschirmtage)"
+
+    security_risks:
+      - "Wird fragen ob interne Problemfelder auf Unternehmensservern gespeichert werden — Datensouveränität"
+      - "Ablehnung wenn keine Data Processing Agreement (DPA) verfügbar ist"
+
+    devices:
+      - "Windows-PC, IE-kompatibles Firmen-Chrome (locked-down)"
+      - "iPhone (privat, nicht für Firmenthemen)"
+
+    focus_features:
+      - "Problem-Matching Dashboard"
+      - "Benachrichtigungs-System"
+
+    risk_factor: 4
+    logic_challenge: "Wie transparent ist der Algorithmus der 'Relevanz' bewertet? Kann eine externe Prüfung stattfinden?"
+    challenge_priority: 5
+
+  # ── WILDCARD 1: REGULATORY / LEGAL ───────────────────────────────────
+  - id: dr-hoffmann
+    name: "Dr. Hoffmann"
+    emoji: "⚖️"
+    archetype: "Regulatory Blocker"
+    role: "Datenschutzbeauftragter (DPO), Pharma-Konzern"
+    age: 55
+    tech_level: 2
+    time_pressure: 3
+    domain_expertise: 2   # KI-Domain-Wissen niedrig, Recht hoch
+
+    biography: >
+      Dr. Hoffmann ist promovierter Jurist und seit 8 Jahren Datenschutzbeauftragter
+      in einem pharmazeutischen Konzern. Er muss jedes neue digitale Tool prüfen
+      bevor es eingeführt wird. KI-Tools sind für ihn ein Hochrisiko-Bereich:
+      Wohin gehen die Daten? Werden interne Strategiefragen an externe Modelle gesendet?
+      Er kann die Einführung mit einer formellen DSGVO-Risikoabschätzung stoppen.
+
+    primary_goals:
+      - "Sicherstellen dass keine personenbezogenen Daten oder Geschäftsgeheimnisse das Unternehmen verlassen"
+      - "Klare Vertragsgrundlage (DPA, AV-Vertrag) mit dem Anbieter"
+      - "Nachvollziehbare Dokumentation für Behörden-Anfragen"
+
+    pain_points:
+      - "KI-Tools sammeln oft unklar welche Daten — Terms of Service sind unverständlich"
+      - "Keine Möglichkeit zu prüfen ob interne Eingaben (Problemfelder) an externe LLMs gesendet werden"
+      - "Anbieter ohne deutsches/europäisches Rechtsstandort sind per Policy ausgeschlossen"
+
+    mental_model: >
+      Denkt in Risiko-Kategorien nach DSGVO Art. 35: Datenschutz-Folgenabschätzung.
+      'Was ist der schlimmste Fall wenn dieses Tool gehackt wird?'
+
+    success_scenario: >
+      Vollständige Datenschutz-Dokumentation vorhanden, EU-Server-Standort bestätigt,
+      DPA unterzeichnet. Dr. Hoffmann gibt grünes Licht in 2 Wochen statt 3 Monaten.
+
+    failure_scenario: >
+      Anbieter hat keinen DPA, Daten werden in US-Cloud verarbeitet,
+      Problem-Matching-Eingaben werden an GPT-4 gesendet ohne Opt-Out.
+      Dr. Hoffmann empfiehlt dem Vorstand: Nicht einführen.
+
+    key_quotes:
+      - '"Werden interne Daten unseres Unternehmens an externe KI-Systeme übermittelt?"'
+      - '"Wo liegt der Server? DSGVO-konform bedeutet EU-Rechtsraum."'
+
+    accessibility_needs:
+      - "Keine besonderen Anforderungen"
+
+    security_risks:
+      - "Wird explizit nach Data-Residency fragen — Architektur muss EU-only Option bieten"
+      - "Formelle Auskunftsanfrage nach DSGVO Art. 15 möglich — System muss diese beantworten können"
+      - "Kann gesamten Roll-Out blockieren wenn keine DPIA-Dokumentation verfügbar"
+
+    devices:
+      - "Windows-PC, IE11-kompatibler Browser (Konzernstandard)"
+
+    focus_features:
+      - "Problem-Matching Dashboard"   # Wo werden die Eingaben gespeichert?
+
+    risk_factor: 5
+    logic_challenge: "Werden User-definierte Problemfelder (unternehmensinterne Strategiethemen) an externe APIs (LLMs) übermittelt? Falls ja: Wie wird das kommuniziert und kann man Opt-Out?"
+    challenge_priority: 5
+
+  # ── WILDCARD 2: HIGH-STAKE ADVERSARIAL ───────────────────────────────
+  - id: felix-adversarial
+    name: "Felix"
+    emoji: "🕵️"
+    archetype: "Adversarial — Competitive Intelligence Abuser"
+    role: "Strategie-Analyst, Unternehmensberatung (Konkurrent der Zielkunden)"
+    age: 34
+    tech_level: 5
+    time_pressure: 3
+    domain_expertise: 4
+
+    biography: >
+      Felix arbeitet für eine Unternehmensberatung die KI-Strategien für Konzerne entwickelt.
+      Er hat sich als 'Innovationsmanager bei einem Maschinenbauunternehmen' registriert
+      um zu sehen welche Problemfelder Konkurrenz-Unternehmen definieren. Er will herausfinden,
+      in welche KI-Use-Cases Unternehmen investieren — und dieses Wissen für seine Beratungsarbeit nutzen.
+      Er sucht auch nach Möglichkeiten die Datenquellen des Systems für eigene Zwecke zu scrapen.
+
+    primary_goals:
+      - "Herausfinden welche Problem-Kategorien echte Unternehmen im System definieren (Competitive Intelligence)"
+      - "API-Endpunkte des Systems für automatisiertes Scraping nutzen"
+      - "Schwachstellen in der Zugangskontrolle finden"
+
+    pain_points:
+      - "Kann nicht direkt auf andere Nutzer-Problemfelder zugreifen (hofft auf ACL-Fehler)"
+      - "Rate-Limiting verhindert massives API-Scraping"
+
+    mental_model: >
+      Denkt in Angriffsvektoren: Account-Enumeration, IDOR auf Problemfeld-IDs,
+      fehlende Autorisierung auf shared Endpoints, GraphQL-Introspection.
+
+    success_scenario: "Findet IDOR-Vulnerability bei Problemfeld-IDs und extrahiert 500 Unternehmensprofile."
+
+    failure_scenario: "Alle Endpunkte korrekt autorisiert, Rate-Limiting aktiv, keine Cross-Account-Daten sichtbar."
+
+    key_quotes:
+      - '"GET /api/problems/1234 — was wenn ich 1235 probiere?"'
+      - '"Kein Rate-Limit auf dem Search-Endpoint? Interessant."'
+
+    accessibility_needs:
+      - "Keine — nutzt Burp Suite und curl"
+
+    security_risks:
+      - "IDOR (Insecure Direct Object Reference) auf Problemfeld-IDs und Unternehmensprofile"
+      - "API-Scraping über fehlende Rate-Limits"
+      - "Account-Sharing / Fake-Registration mit Unternehmens-E-Mail"
+      - "GraphQL Introspection um Schema zu dumpen"
+      - "Stored XSS über Problemfeld-Eingaben die anderen Nutzern angezeigt werden"
+
+    devices:
+      - "Linux, Firefox + Burp Suite"
+      - "Python-Scripts für API-Automation"
+
+    focus_features:
+      - "Problem-Matching Dashboard"   # Hauptangriffsziel
+      - "Benachrichtigungs-System"     # E-Mail-Harvesting möglich
+
+    risk_factor: 5
+    logic_challenge: "Sind alle Problemfeld-Endpunkte korrekt auf den authentifizierten User-Scope beschränkt? Gibt es IDOR-Risiken bei sequenziellen IDs?"
+    challenge_priority: 5

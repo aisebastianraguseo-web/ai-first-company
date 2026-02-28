@@ -1,0 +1,169 @@
+contrarian_report:
+  id: "ca-20260227-ki-radar"
+  product: ki-radar
+  generated_at: "2026-02-27"
+  triggered_by: "Phase 2 Specs — Pre-Build Review"
+
+  challenges:
+
+    # ── HIGH PRIORITY (vor Implementation klären) ────────────
+
+    - id: "CA-001"
+      type: missing_perspective
+      urgency: BEFORE_IMPLEMENTATION
+      title: "Keyword-Matching für Problem-Matching ist zu schwach für Enterprise-Value-Proposition"
+      challenged_decision: "MVP-Matching via Keyword-Matching (lokal, kein LLM)"
+      challenge: |
+        Die Value Proposition des KI-Radars ist: "bewertet neue KI-Funktionen nach ihrem
+        praktischen Nutzen". Keyword-Matching kann das nicht leisten. Wenn ein Nutzer
+        schreibt "Wir wollen Lieferkettenprognosen verbessern" und ein ArXiv-Paper
+        über "Supply Chain Optimization with Reinforcement Learning" erscheint, wird
+        Keyword-Matching den Match nur finden wenn "supply chain" im Problemfeld steht.
+        Das ist semantisch blind — genau das Problem das wir lösen wollen.
+      evidence:
+        - "Value Proposition nennt explizit 'bewertet nach praktischem Nutzen' — Keyword-Matching leistet das nicht"
+        - "Stefan-Persona würde Keyword-Matches als 'zu simpel' bewerten und nicht zahlen"
+        - "Markus braucht Signal, kein Rauschen — False Positives durch Keyword-Matches verschlechtern Signal"
+      counterpoint: "Keyword-Matching ist DSGVO-safe und einfach implementierbar — guter MVP-Start"
+      resolution_options:
+        - "Option A: Keyword-Matching MVP + expliziter Opt-In für LLM-Matching (empfohlen per ADR-004)"
+        - "Option B: LLM-Matching von Anfang an, aber mit Data Residency-Garantie (EU-LLM)"
+        - "Option C: Hybrid — Keyword-Filter zuerst, LLM-Ranking nur für Top-Kandidaten"
+      recommended_action: human_decision
+      affects_spec: "feature-problem-matching.md — Business Rules #4"
+
+    - id: "CA-002"
+      type: assumption_challenge
+      urgency: BEFORE_IMPLEMENTATION
+      title: "KI-Radar ist ein Datenaggregations-Service — rechtliches Risiko beim Scrapen wird nicht adressiert"
+      challenged_assumption: "Öffentliche Quellen können unbegrenzt automatisch aggregiert werden"
+      challenge: |
+        ArXiv hat Rate-Limits und Terms of Service. GitHub hat Rate-Limits (60 req/h unauthenticated).
+        VC-Blogs (Sequoia, a16z) erlauben möglicherweise kein automatisches Scraping in ihren ToS.
+        Crunchbase hat explizite API-Zugangsbeschränkungen. Die Specs definieren Quellen,
+        aber kein rechtliches Analyse-Dokument. Das kann zu technischen Problemen (Rate-Limit-Bans)
+        und rechtlichen Problemen (ToS-Verletzung) führen.
+      evidence:
+        - "GitHub API: 60 req/h unauthenticated, 5000 req/h mit Auth-Token"
+        - "Crunchbase: Free API sehr eingeschränkt, Enterprise-Plan für systematischen Zugriff"
+        - "Scraping von Unternehmens-Newsrooms ist rechtlich grau (BGH-Rechtsprechung)"
+      counterpoint: "Viele ähnliche Produkte (Feedly, Perplexity) machen das erfolgreich — Industriestandard"
+      resolution_options:
+        - "Für jede Quelle: API vs. Scraping, Rate-Limits, ToS-Status dokumentieren (ADR-005)"
+        - "Offizielle APIs bevorzugen wo verfügbar (ArXiv API, GitHub API, Anthropic Changelog RSS)"
+        - "Legal-Review für automatisches Scraping von Premium-VC-Blogs"
+      recommended_action: batch_approval
+      affects_spec: "feature-quellaggregation.md — Business Rules"
+
+    - id: "CA-003"
+      type: missing_perspective
+      urgency: BEFORE_IMPLEMENTATION
+      title: "Capability-Taxonomy ist zu technisch — Non-Expert-Personas werden nicht abgeholt"
+      challenged_decision: "8 Standard-Tags (Reasoning, Vision, Tool-Use etc.)"
+      challenge: |
+        Die Standard-Tags (Reasoning & Planning, Vision & Multimodal, Tool Use & Agents)
+        sind sinnvoll für Stefan (CTO, Tech-Level 5). Für Andrea (IT-Leiterin Maschinenbau,
+        Tech-Level 2) und Markus (Innovation Manager, Tech-Level 4) bedeuten diese Tags
+        wenig. "Tool Use & Agents" erklärt nicht, was das für Maschinenbau-Automatisierung
+        bedeutet. Die Tags brauchen eine Branchen-Mapping-Ebene oder zumindest
+        Business-Äquivalente.
+      evidence:
+        - "Andrea-Persona: 'Was das konkret für mein Unternehmen bedeutet' ist ihr Schlüsselbedürfnis"
+        - "Markus-Persona: Will Business-Relevanz sehen, nicht technische Klassifikation"
+        - "Vergleich: Gartner Hype Cycle benutzt Business-orientierte Labels"
+      counterpoint: "Einfachsprache-Erklärungen per Tooltip adressieren dies bereits (feature-faehigkeiten-analyse.md)"
+      resolution_options:
+        - "Business-Mapping Layer hinzufügen: Jeder Tag hat 2-3 Branchen-Anwendungsbeispiele"
+        - "Zweite Taxonomy-Ebene: Business Impact Categories parallel zu technischen Tags"
+      recommended_action: batch_approval
+      affects_spec: "feature-faehigkeiten-analyse.md — Capability-Taxonomy"
+
+    # ── MEDIUM PRIORITY (vor Launch adressieren) ────────────
+
+    - id: "CA-004"
+      type: assumption_challenge
+      urgency: BEFORE_LAUNCH
+      title: "Das Produkt löst ein Problem das Nutzer vielleicht nicht als Problem wahrnehmen"
+      challenged_assumption: "Innovationsmanager wollen einen weiteren Feed aggregiert bekommen"
+      challenge: |
+        Die Produktvision geht davon aus, dass das Hauptproblem 'Information Overload' ist.
+        Aber viele Innovationsmanager haben bereits kuratierte Newsletter-Abonnements,
+        vertrauten LinkedIn-Netzwerken und eigenen Analyst-Teams. Der KI-Radar muss
+        besser sein als die etablierten Lösungen (Gartner, Forrester, spezialisierte
+        KI-Newsletter), nicht nur 'auch ein Feed'. Was ist der Killer-Differenziator
+        der diese Investition rechtfertigt?
+      evidence:
+        - "Markus folgt bereits explizit Quellen — er hat einen Prozess, er will ihn verbessern"
+        - "Alternativprodukte: Morning Brew AI, The Rundown AI, TLDR Newsletter"
+        - "Problem-Matching ist der echte Differenziator — aber nur wenn es gut funktioniert (CA-001)"
+      counterpoint: "Problem-Matching existiert bei keinem der genannten Wettbewerber in dieser Form"
+      resolution_options:
+        - "Problem-Matching aggressiv positionieren als Primary Feature, Feed als sekundär"
+        - "Wettbewerber-Analyse als Pre-Build-Artefakt (1 Seite)"
+      recommended_action: batch_approval
+      affects_spec: "products/ki-radar/specs/product-vision.md"
+
+    - id: "CA-005"
+      type: missing_perspective
+      urgency: BEFORE_LAUNCH
+      title: "Personas fehlen: KMU-Inhaber und Startup-CTO mit kleinem Budget"
+      challenged_decision: "Zielgruppe auf Großkonzern/Mittelstand fokussiert"
+      challenge: |
+        Alle 4 Standard-Personas sind in Unternehmen mit >100 Mitarbeitern angesiedelt.
+        Ein relevanter Nutzersegment ist: Startup-CTO (10-20 Personen) und
+        solopreneur Berater die KI für Kunden auswählen. Diese Nutzersegmente haben
+        andere Zahlungsbereitschaft (niedrig), andere Nutzungsintensität (täglich, selbst aktiv)
+        und andere Feature-Prioritäten (schnelle Aktualität > historische Analyse).
+      evidence:
+        - "Startup-Markt: Mehr Schmerz, mehr Zahlungsbereitschaft für echter Problem-Löser"
+        - "Stefan-Persona ist CTO, aber in 150-Personen-Unternehmen — nicht Startup"
+      counterpoint: "Enterprise-Focus ist bewusste Entscheidung für höhere ACV — Startups zahlen weniger"
+      resolution_options:
+        - "Bewusste Entscheidung dokumentieren: Enterprise-Only-Fokus oder Freemium für Startups"
+        - "Wenn Freemium: Separate Persona hinzufügen"
+      recommended_action: batch_approval
+      affects_spec: "products/ki-radar/personas/variables.yaml"
+
+    # ── LOW PRIORITY (nice to address) ────────────
+
+    - id: "CA-006"
+      type: assumption_challenge
+      urgency: NICE_TO_ADDRESS
+      title: "Backend-Architektur mit Microservices ist Over-Engineering für MVP"
+      challenged_assumption: "Cloud-native Microservice-Stack ist die richtige Architektur für MVP"
+      challenge: |
+        Die Vision nennt 'Cloud-native Microservice-Stack' als Anforderung.
+        Für ein MVP mit vermutlich <100 Beta-Nutzern ist ein Monolith einfacher zu deployen,
+        debuggen und kosteneffizienter. Microservices bringen Operational Overhead der
+        erst ab signifikanter Scale sinnvoll ist. LEARN-002 (Expense Tracker) zeigt:
+        Vanilla JS ohne Build-Step war schneller und einfacher.
+      evidence:
+        - "Martin Fowler: 'Don't start with Microservices' für neue Produkte"
+        - "LEARN-002: Einfachheit gewinnt in Phase 1"
+      counterpoint: "ki-radar hat Backend-Aggregation-Jobs die isoliert deployt werden müssen — etwas Modularität ist sinnvoll"
+      resolution_options:
+        - "MVP als Modular Monolith (ein Deployment, modularer Code)"
+        - "Zwei Services: API-Server + Aggregation-Worker (nicht vollständige Microservices)"
+      recommended_action: batch_approval
+      affects_spec: "products/ki-radar/specs/mvp-scope.md — Technische Anforderungen"
+
+  summary:
+    total_challenges: 6
+    before_implementation: 3
+    before_launch: 2
+    nice_to_address: 1
+    top_3_for_human_review:
+      - "CA-001: Keyword-Matching vs. semantisches Matching (Human-Entscheidung nötig)"
+      - "CA-002: Rechtliche Quellen-Analyse vor Implementation"
+      - "CA-003: Taxonomy-Business-Mapping für Non-Experts"
+
+  contrarian_verdict:
+    overall: >
+      Specs sind solide und vollständig. Drei strukturelle Risiken die vor Build-Start
+      adressiert werden sollten: (1) Problem-Matching-Qualität hängt von LLM-Entscheidung ab,
+      (2) Quellen-ToS-Risiko ist ungeprüft, (3) Capability-Taxonomy ist zu tech-fokussiert
+      für Non-Expert-Personas.
+    recommendation: >
+      BUILD STARTEN möglich nach: (a) ADR-004 Entscheidung (LLM Ja/Nein für Matching),
+      (b) Quick-Check der ToS der Top-5-Quellen (30 min Recherche).
+      CA-003, CA-005, CA-006 können parallel zum Build bearbeitet werden.

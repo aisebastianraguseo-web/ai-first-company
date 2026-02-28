@@ -1,0 +1,98 @@
+name: Deploy KI-Radar → Vercel
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'products/ki-radar/app/**'
+  workflow_dispatch:
+
+env:
+  PRODUCT_DIR: products/ki-radar/app
+  NODE_VERSION: '20'
+
+jobs:
+  # ── Tests ────────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.PRODUCT_DIR }}/package-lock.json
+      - run: npm ci
+        working-directory: ${{ env.PRODUCT_DIR }}
+      - run: npm test
+        working-directory: ${{ env.PRODUCT_DIR }}
+
+  # ── Security Check ───────────────────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for hardcoded secrets
+        run: |
+          if grep -rn \
+            -e 'sk_live_[A-Za-z0-9]\+' \
+            -e 'eyJhbGciOiJ[A-Za-z0-9+/=]\{20,\}' \
+            --include='*.ts' --include='*.tsx' \
+            ${{ env.PRODUCT_DIR }}/app ${{ env.PRODUCT_DIR }}/lib ${{ env.PRODUCT_DIR }}/components 2>/dev/null \
+            | grep -v 'test\|spec\|mock'; then
+            echo "ERROR: Possible hardcoded secrets"
+            exit 1
+          fi
+          echo "No hardcoded secrets found"
+
+      - name: Verify CSP in next.config.mjs
+        run: |
+          if grep -q "Content-Security-Policy" ${{ env.PRODUCT_DIR }}/next.config.mjs; then
+            echo "CSP header present"
+          else
+            echo "ERROR: No Content-Security-Policy in next.config.mjs"
+            exit 1
+          fi
+
+  # ── Type Check ───────────────────────────────────────────────────────────
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.PRODUCT_DIR }}/package-lock.json
+      - run: npm ci
+        working-directory: ${{ env.PRODUCT_DIR }}
+      - run: npx tsc --noEmit
+        working-directory: ${{ env.PRODUCT_DIR }}
+
+  # ── Deploy Production ────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Vercel
+    needs: [test, security, typecheck]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://ki-radar-aisebastianraguseo-webs-projects.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token:      ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.KI_RADAR_VERCEL_PROJECT_ID }}
+          working-directory: ${{ env.PRODUCT_DIR }}
+          vercel-args: '--prod --yes'
+
+      - name: Post-deploy summary
+        run: |
+          echo "KI-Radar deployed to production"
+          echo "URL: https://app-three-eta-66.vercel.app"

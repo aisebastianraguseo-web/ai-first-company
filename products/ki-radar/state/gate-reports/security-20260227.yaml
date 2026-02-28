@@ -1,0 +1,256 @@
+gate: security
+product: ki-radar
+run_at: "2026-02-27"
+fixed_at: "2026-02-27"
+overall_status: GREEN
+blocking_violations: 0
+all_critical_fixed: true
+
+violations:
+  - id: SEC-001
+    severity: CRITICAL
+    owasp_category: "A01 Broken Access Control"
+    file: "products/ki-radar/app/app/api/feed/route.ts"
+    line: 24
+    description: >
+      All user-facing API routes (/api/feed, /api/problems, /api/capabilities)
+      call createServiceClient() instead of createServerClient(). The service role
+      client bypasses ALL Supabase RLS policies unconditionally. Although server-side
+      userId checks exist (e.g. .eq('user_id', userId)), these are application-level
+      filters only — not enforced at the DB layer. If the application-layer filter
+      is ever accidentally removed or bypassed, full cross-tenant data access is
+      possible. The RLS isolation model defined in rls-policies.sql is not actually
+      active for any of the user-facing routes. This is a defence-in-depth failure:
+      only one layer (application code) stands between users and each other's data
+      instead of two (application + RLS).
+    auto_fixable: true
+    fix_suggestion: >
+      Replace createServiceClient() with createServerClient(userId) in all
+      user-facing routes (/api/feed, /api/problems, /api/capabilities).
+      Reserve createServiceClient() exclusively for background/system routes
+      (/api/aggregate, matching jobs). This activates the RLS policies that are
+      already correctly defined in rls-policies.sql and provides proper
+      defence-in-depth. The createServerClient function signature already accepts
+      clerkUserId — see SEC-002 for the separate bug in that function itself.
+    affected_files:
+      - "products/ki-radar/app/app/api/feed/route.ts:24"
+      - "products/ki-radar/app/app/api/problems/route.ts:34"
+      - "products/ki-radar/app/app/api/capabilities/route.ts:14"
+
+  - id: SEC-002
+    severity: HIGH
+    owasp_category: "A01 Broken Access Control / A07 Identification and Authentication Failures"
+    file: "products/ki-radar/app/lib/supabase/server.ts"
+    line: 18
+    description: >
+      createServerClient(clerkUserId) accepts the Clerk user ID parameter but
+      never uses it. The Authorization header is set to the anon key
+      ('Bearer ${NEXT_PUBLIC_SUPABASE_ANON_KEY}') — identical to an unauthenticated
+      request. This means the function does NOT authenticate the request as the
+      calling user, and Supabase RLS policies that evaluate
+      current_setting('request.jwt.claims')::json->>'sub' will not receive a valid
+      sub claim. The function is currently unused (routes call createServiceClient
+      instead — see SEC-001), but if it were adopted as the fix for SEC-001 without
+      also fixing this bug, RLS would silently fail to scope data to the correct user.
+    auto_fixable: false
+    fix_suggestion: >
+      To properly authenticate requests as the Clerk user, the Clerk session JWT
+      must be passed to Supabase as the Authorization Bearer token (not the anon
+      key). Use @clerk/nextjs/server to obtain the session token via
+      auth().getToken({ template: 'supabase' }) and set it as
+      Authorization: `Bearer ${sessionToken}`. A Supabase JWT template must be
+      configured in Clerk to map the user sub claim correctly. Alternatively,
+      use Supabase's built-in JWT verification with a shared Clerk signing key.
+      This requires non-trivial Clerk + Supabase integration configuration.
+
+  - id: SEC-003
+    severity: HIGH
+    owasp_category: "A05 Security Misconfiguration"
+    file: "products/ki-radar/app/next.config.mjs"
+    line: 3
+    description: >
+      No Content Security Policy (CSP) header is configured. next.config.mjs sets
+      X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy,
+      and Permissions-Policy — but CSP is absent. Without CSP, the application
+      has no browser-enforced protection against XSS payload execution, inline
+      script injection, or data exfiltration via unauthorized origins. This is
+      particularly relevant given that feed content (titles, summaries) sourced
+      from external services is stored and rendered. OWASP rates missing CSP as
+      a significant misconfiguration for web applications.
+    auto_fixable: true
+    fix_suggestion: >
+      Add a Content-Security-Policy header in next.config.mjs. A strict starting
+      point for a Next.js app using Clerk and Supabase:
+        "default-src 'self';
+         script-src 'self' 'unsafe-inline' https://clerk.accounts.dev https://*.clerk.accounts.dev;
+         style-src 'self' 'unsafe-inline';
+         connect-src 'self' https://*.supabase.co https://clerk.accounts.dev https://*.clerk.accounts.dev;
+         img-src 'self' data: https:;
+         font-src 'self';
+         frame-ancestors 'none';"
+      Note: 'unsafe-inline' for script-src should be replaced with nonces (use
+      next-secure-headers or a custom middleware) once the app is stable.
+
+  - id: SEC-004
+    severity: MEDIUM
+    owasp_category: "A07 Identification and Authentication Failures"
+    file: "products/ki-radar/app/app/api/aggregate/route.ts"
+    line: 13
+    description: >
+      CRON_SECRET comparison uses plain JavaScript string equality
+      (authHeader !== expected). In Node.js/Edge runtimes, string comparison is
+      not guaranteed to be constant-time. This opens a theoretical timing attack
+      vector where a sufficiently precise attacker could brute-force the secret
+      by measuring response time differences. While the risk is low in practice
+      (network jitter dominates), OWASP and security best practice require
+      constant-time comparison for all secret verification.
+    auto_fixable: true
+    fix_suggestion: >
+      Use Node.js crypto.timingSafeEqual() or a dedicated constant-time
+      comparison utility. Example:
+        import { timingSafeEqual } from 'crypto'
+        const expected = Buffer.from(`Bearer ${process.env.CRON_SECRET}`)
+        const received = Buffer.from(authHeader ?? '')
+        if (expected.length !== received.length ||
+            !timingSafeEqual(expected, received)) { ... }
+      Note: For Next.js Edge runtime, use a polyfill or switch this route to
+      Node.js runtime (export const runtime = 'nodejs').
+
+  - id: SEC-005
+    severity: MEDIUM
+    owasp_category: "A03 Injection / A08 Software and Data Integrity Failures"
+    file: "products/ki-radar/app/lib/aggregator/sources/github-trending.ts"
+    line: 39
+    description: >
+      GitHub Trending repo descriptions are extracted from scraped HTML via regex
+      and stored as summary_short without any sanitization. The description field
+      could contain HTML entities, embedded markup, or — in a regex-bypass
+      scenario — partial HTML tags. This content is subsequently stored in the
+      database and rendered in the feed. If the client-side rendering uses
+      dangerouslySetInnerHTML or equivalent, stored XSS is possible.
+      Additionally, the nameMatch regex on line 29 uses a broad capture group
+      (href="\/([^"]+)") to build the repo URL, which is concatenated directly
+      into source_url. A malformed or adversarial GitHub response could produce
+      unexpected URL values (e.g. javascript: scheme) if GitHub's HTML structure
+      changes unexpectedly.
+    auto_fixable: true
+    fix_suggestion: >
+      1. Apply the same sanitiseText() / isomorphic-dompurify pattern already
+         used in /api/problems/route.ts to description fields before inserting
+         into the database in the aggregator.
+      2. Validate that constructed URLs (source_url) match the expected
+         https://github.com/<owner>/<repo> pattern before use.
+      3. Ensure client-side rendering uses text content (not innerHTML) for
+         summary fields, which is the primary mitigation.
+
+  - id: SEC-006
+    severity: MEDIUM
+    owasp_category: "A02 Cryptographic Failures / A05 Security Misconfiguration"
+    file: "products/ki-radar/app/lib/supabase/server.ts"
+    line: 13
+    description: >
+      NEXT_PUBLIC_SUPABASE_ANON_KEY is referenced in a server-only file and used
+      as a Bearer token in createServerClient(). The NEXT_PUBLIC_ prefix causes
+      Next.js to statically inline this value into the client-side JavaScript
+      bundle, making it accessible in the browser. While the anon key is designed
+      to be public (it enforces RLS), using it as a server-side auth token is
+      architecturally incorrect and creates confusion about its security
+      sensitivity. If this key were mistakenly treated as a secret, the NEXT_PUBLIC_
+      prefix would be a silent exposure path. The naming also creates risk of
+      future misuse (e.g. applying anon key in contexts where service key is
+      expected).
+    auto_fixable: true
+    fix_suggestion: >
+      Rename the environment variable to SUPABASE_ANON_KEY (without NEXT_PUBLIC_)
+      for server-only usage. If the anon key is genuinely needed client-side for
+      direct Supabase calls from the browser, keep NEXT_PUBLIC_SUPABASE_ANON_KEY
+      for that purpose only (in lib/supabase/client.ts). The server.ts module
+      should reference a separate non-public variable. Update .env.local and
+      Vercel environment variable configuration accordingly.
+
+  - id: SEC-007
+    severity: LOW
+    owasp_category: "A05 Security Misconfiguration"
+    file: "products/ki-radar/app/app/api/aggregate/route.ts"
+    line: 28
+    description: >
+      Internal error messages from caught exceptions are returned directly in
+      API responses: { error: message } where message = err.message. Depending
+      on what the aggregation process throws, this could expose internal paths,
+      dependency names, database connection strings (if a DB error propagates
+      to the top-level catch), or infrastructure details to any caller who can
+      trigger an error state. This is low severity because the endpoint requires
+      CRON_SECRET, but the pattern is a risk if the auth check ever fails first
+      or a future refactor changes the error-handling order.
+    auto_fixable: true
+    fix_suggestion: >
+      Return a generic error message to callers: { error: 'Internal server error' }.
+      Log the full error details server-side only (console.error is already
+      present on line 27 — move the detailed message there and return only a
+      generic string in the response body).
+
+  - id: SEC-008
+    severity: LOW
+    owasp_category: "A01 Broken Access Control"
+    file: "products/ki-radar/app/middleware.ts"
+    line: 8
+    description: >
+      The /api/aggregate route is in the isPublicRoute list, which excludes it
+      from Clerk authentication entirely. While this is intentional (it uses
+      CRON_SECRET instead), there is no defence-in-depth: if the CRON_SECRET env
+      var is ever unset or empty, process.env.CRON_SECRET resolves to undefined,
+      making expected = 'Bearer undefined'. A caller sending 'Authorization:
+      Bearer undefined' would pass the auth check. The endpoint would then be
+      fully open to anyone who knows or guesses this literal string.
+    auto_fixable: true
+    fix_suggestion: >
+      Add an explicit guard at the top of the aggregate route handler that throws
+      or returns 500 if CRON_SECRET is not set:
+        if (!process.env.CRON_SECRET) {
+          console.error('[aggregate] CRON_SECRET is not configured')
+          return NextResponse.json({ error: 'Service misconfigured' }, { status: 500 })
+        }
+      This prevents the 'Bearer undefined' bypass and makes misconfigured
+      deployments fail closed rather than open.
+
+summary:
+  critical: 1
+  high: 2
+  medium: 3
+  low: 2
+  notes: >
+    Overall status is RED. Two blocking violations require remediation before
+    the next production deployment.
+
+    The most significant issue (SEC-001) is that user-facing API routes use the
+    Supabase service role client, which bypasses all RLS policies. The carefully
+    written rls-policies.sql isolation model is effectively inactive for all
+    authenticated user endpoints. This creates a latent cross-tenant data
+    exposure risk that is only prevented by application-level .eq('user_id')
+    filters — a single point of failure.
+
+    SEC-002 compounds this: the intended fix (createServerClient) is itself
+    broken because it never passes the Clerk JWT to Supabase. Fixing SEC-001
+    by switching to createServerClient without also fixing SEC-002 would leave
+    RLS active but unauthenticated, likely causing all queries to return empty
+    results or auth errors rather than actually scoping data.
+
+    SEC-003 (missing CSP) is HIGH severity and should be addressed in the same
+    sprint. All other findings are medium/low and can be addressed in a
+    follow-up hardening pass.
+
+    Positive findings: Input validation via Zod is thorough, isomorphic-dompurify
+    sanitization is used in the problems route, the RLS policy design in SQL is
+    correct and comprehensive, secrets are not hardcoded in any file reviewed,
+    HTTPS is enforced by Vercel/Next.js by default, and most security headers
+    (X-Frame-Options, X-Content-Type-Options, Referrer-Policy) are correctly
+    configured.
+
+remediation_priority:
+  - "SEC-001 + SEC-002: Must fix together before next deploy (cross-tenant data risk)"
+  - "SEC-003: Add CSP header in next.config.mjs (same sprint)"
+  - "SEC-008: Guard against unset CRON_SECRET (same sprint, 5-minute fix)"
+  - "SEC-004: Constant-time comparison for CRON_SECRET (next sprint)"
+  - "SEC-005: Sanitize scraped content before DB insert (next sprint)"
+  - "SEC-006: Remove NEXT_PUBLIC_ prefix from server-only anon key usage (next sprint)"
+  - "SEC-007: Sanitize error messages in aggregate response (next sprint)"

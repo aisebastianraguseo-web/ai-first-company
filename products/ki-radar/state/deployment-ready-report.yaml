@@ -1,0 +1,143 @@
+report: deployment-ready
+product: ki-radar
+generated_at: "2026-02-27"
+pipeline_version: "1.0.0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GATE STATUS SUMMARY
+# ─────────────────────────────────────────────────────────────────────────────
+gates:
+  security:   GREEN   # All 8 findings FIXED (SEC-001..008)
+  accessibility: GREEN  # All HIGH fixed; 2 LOW items deferred to V2
+  quality:    GREEN   # QA-001..003 (CRITICAL+HIGH) FIXED; QA-004+005 deferred
+
+overall_gate_status: GREEN
+deployment_blocked: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRODUCT STATS
+# ─────────────────────────────────────────────────────────────────────────────
+stats:
+  total_files_app: 40
+  total_source_files: 46
+  test_files: 2
+  test_count: 22         # 10 capability-tagger + 12 problem-matcher (est.)
+  source_adapters: 5     # arxiv, hackernews, github, release-notes, vc-news
+  api_routes: 4          # aggregate, feed, problems, capabilities
+  pages: 6               # sign-in, sign-up, dashboard, capability-map, problems
+  components: 9
+  personas: 6
+  feature_specs: 4       # F-001..F-004 (F-004 descoped MVP)
+  adrs: 5                # ADR-004..008
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TECH STACK
+# ─────────────────────────────────────────────────────────────────────────────
+stack:
+  frontend: "Next.js 14 App Router"
+  auth: "Clerk EU Instance (DSGVO-compliant)"
+  database: "Supabase Frankfurt (PostgreSQL + RLS)"
+  deployment: "Vercel"
+  cron: "GitHub Actions (daily 06:00 UTC)"
+  styling: "Custom CSS (no Tailwind runtime — bundle-safe)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY HARDENING APPLIED
+# ─────────────────────────────────────────────────────────────────────────────
+security_hardening:
+  - "RLS active on all user-facing routes via Clerk JWT (SEC-001/002)"
+  - "Full Content-Security-Policy header (SEC-003)"
+  - "CRON_SECRET: timing-safe comparison + fail-closed guard (SEC-004/008)"
+  - "GitHub scraper descriptions: DOMPurify ALLOWED_TAGS=[] (SEC-005)"
+  - "Server-only SUPABASE_ANON_KEY (no NEXT_PUBLIC_ prefix) (SEC-006)"
+  - "Generic error messages in API responses (SEC-007)"
+  - "UUID v4 IDs for all resources (Felix adversarial persona requirement)"
+  - "Zod validation + DOMPurify sanitization on all user inputs"
+  - "404 on unauthorized problem field access (no enumeration)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ACCESSIBILITY COMPLIANCE
+# ─────────────────────────────────────────────────────────────────────────────
+accessibility:
+  standard: "WCAG 2.1 AA"
+  status: GREEN
+  key_implementations:
+    - "--color-text-muted: #9da2bb (≥4.5:1 contrast on dark backgrounds)"
+    - "Color + symbol + text for all status indicators (Andrea Rot-Grün-Blindheit)"
+    - "Focus trap in ProblemForm modal + Escape closes (A11Y-005)"
+    - "CapabilityMap detail panel: programmatic focus on open (A11Y-006)"
+    - "High Contrast Mode: input:focus outline via forced-colors media query (A11Y-008)"
+    - "Skip link to #main-content in RootLayout"
+    - "aria-live regions for feed updates and form errors"
+    - "Semantic HTML: <article>, <aside>, <nav>, <main>, <time>, <fieldset>"
+    - "All emoji aria-hidden with text alternatives"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MVP ACCEPTANCE CRITERIA STATUS
+# ─────────────────────────────────────────────────────────────────────────────
+acceptance_criteria:
+  AC-001: PASS    # Cron via GitHub Actions daily
+  AC-002: PASS    # 5 source types: arxiv, hn, github, release-notes, vc-news
+  AC-003: PASS    # 8 capability tags, keyword-based, build-time bundled
+  AC-004: PASS    # description_plain for Andrea (non-technical users)
+  AC-005: PASS    # Min 3 problem fields, match display, limit 10
+  AC-006: PASS    # source, date, confidence, original link on every item
+  AC-007: PASS    # UUID v4 IDs enforced at DB level (Supabase)
+  AC-008: PENDING # DSGVO: EU hosting confirmed; Privacy Policy pending (legal)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRE-DEPLOY CHECKLIST
+# ─────────────────────────────────────────────────────────────────────────────
+pre_deploy_checklist:
+  infrastructure:
+    - "[ ] Create Supabase project (region: eu-central-1 Frankfurt)"
+    - "[ ] Run infrastructure/schema.sql"
+    - "[ ] Run infrastructure/rls-policies.sql"
+    - "[ ] Create Clerk application (EU instance)"
+    - "[ ] Configure Clerk 'supabase' JWT template (sub claim → user_id)"
+    - "[ ] Set SUPABASE_JWT_SECRET in Clerk signing key"
+
+  vercel:
+    - "[ ] Connect GitHub repo to Vercel"
+    - "[ ] Set environment variables (see .env.example)"
+    - "[ ] Verify SUPABASE_ANON_KEY (NOT NEXT_PUBLIC_) is set server-side"
+    - "[ ] Set CRON_SECRET (min 32 random chars)"
+
+  github_actions:
+    - "[ ] Set repository secret: KI_RADAR_URL (Vercel deployment URL)"
+    - "[ ] Set repository secret: CRON_SECRET (same value as Vercel)"
+    - "[ ] Test manual dispatch of ki-radar-aggregate.yml workflow"
+
+  legal:
+    - "[ ] Privacy Policy page published"
+    - "[ ] DPA with Supabase signed (already EU)"
+    - "[ ] DPA with Clerk signed (EU instance)"
+    - "[ ] Cookie notice if any analytics added"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# KNOWN V2 BACKLOG ITEMS (not MVP blockers)
+# ─────────────────────────────────────────────────────────────────────────────
+v2_backlog:
+  - "F-004: Email notifications (descoped from MVP — see feature-benachrichtigung.md)"
+  - "A11Y-009: Secondary skip link for dashboard sidebar"
+  - "QA-004: Aggregator + API route test suite"
+  - "QA-006..011: Function length refactors (MEDIUM quality)"
+  - "Mobile navigation (sidebar is hidden on mobile — no bottom nav yet)"
+  - "Rate limiting middleware (currently platform-level via Vercel Pro)"
+  - "ADR-007 follow-up: LLM-based capability tagging for V2"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PIPELINE SUMMARY
+# ─────────────────────────────────────────────────────────────────────────────
+pipeline_phases:
+  phase_1_personas:    COMPLETE   # 6 personas (incl. Felix adversarial + Dr. Hoffmann DPO)
+  phase_2_specs:       COMPLETE   # 4 feature specs, contrarian report, 5 ADRs
+  human_checkpoint:    COMPLETE   # Vercel/Clerk/GitHub Actions/email descoped
+  phase_3_codegen:     COMPLETE   # 40 files generated
+  phase_4_security:    GREEN      # All 8 findings resolved
+  phase_5_a11y:        GREEN      # Contrast, focus trap, panel focus, HCM
+  phase_5_quality:     GREEN      # CRITICAL QA-001..003 resolved
+  phase_6_report:      COMPLETE
+
+recommendation: DEPLOY_TO_BETA
+next_action: "Complete pre-deploy checklist, run schema.sql, configure secrets, trigger first aggregation"
