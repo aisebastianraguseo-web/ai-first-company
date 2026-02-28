@@ -174,7 +174,7 @@ ki-radar:
         fix: switched to createServiceClient(), userId enforced at app level
       - date: "2026-02-28"
         bug: Clerk worker-src CSP missing → blob workers blocked → auth broken
-        fix: added worker-src blob: to next.config.mjs
+        fix: "added worker-src blob: to next.config.mjs"
       - date: "2026-02-28"
         bug: alias ki-radar-aisebastianraguseo-webs-projects.vercel.app pointed to old deployment
         fix: re-aliased to latest deployment via Vercel API
