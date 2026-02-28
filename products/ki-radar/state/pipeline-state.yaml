@@ -1,0 +1,90 @@
+id: ki-radar-2026-02-27
+product_id: ki-radar
+pipeline_yaml: pipeline.yaml
+started_at: "2026-02-27T00:00:00"
+updated_at: "2026-02-28T09:36:00"
+status: completed
+current_phase: deploy
+checkpoint_pending: null
+errors: []
+metadata:
+  built_via: claude-session
+  live_url: https://ki-radar-aisebastianraguseo-webs-projects.vercel.app
+  vercel_project_id: prj_AmYioQVkUnCQc0KBoj2PGq3SuedF
+  feed_items_inserted: 1782
+  feed_items_tagged: 1370
+  first_aggregation: "2026-02-28"
+  bugs_fixed: 4
+
+phases:
+  phase-1-personas:
+    phase_id: phase-1-personas
+    status: completed
+    started_at: "2026-02-27T00:00:00"
+    completed_at: "2026-02-27T01:00:00"
+    agent_results: []
+    errors: []
+
+  phase-2-specs:
+    phase_id: phase-2-specs
+    status: completed
+    started_at: "2026-02-27T01:00:00"
+    completed_at: "2026-02-27T02:00:00"
+    agent_results: []
+    errors: []
+
+  human-checkpoint:
+    phase_id: human-checkpoint
+    status: completed
+    started_at: "2026-02-27T02:00:00"
+    completed_at: "2026-02-27T02:30:00"
+    agent_results: []
+    errors: []
+
+  phase-3-build:
+    phase_id: phase-3-build
+    status: completed
+    started_at: "2026-02-27T02:30:00"
+    completed_at: "2026-02-27T06:00:00"
+    agent_results: []
+    errors: []
+
+  phase-4-security:
+    phase_id: phase-4-security
+    status: completed
+    started_at: "2026-02-27T06:00:00"
+    completed_at: "2026-02-27T06:30:00"
+    agent_results: []
+    errors: []
+
+  phase-5-a11y:
+    phase_id: phase-5-a11y
+    status: completed
+    started_at: "2026-02-27T06:30:00"
+    completed_at: "2026-02-27T07:00:00"
+    agent_results: []
+    errors: []
+
+  phase-5-quality:
+    phase_id: phase-5-quality
+    status: completed
+    started_at: "2026-02-27T07:00:00"
+    completed_at: "2026-02-27T07:30:00"
+    agent_results: []
+    errors: []
+
+  phase-6-report:
+    phase_id: phase-6-report
+    status: completed
+    started_at: "2026-02-27T07:30:00"
+    completed_at: "2026-02-27T08:00:00"
+    agent_results: []
+    errors: []
+
+  deploy:
+    phase_id: deploy
+    status: completed
+    started_at: "2026-02-28T00:00:00"
+    completed_at: "2026-02-28T09:36:00"
+    agent_results: []
+    errors: []
