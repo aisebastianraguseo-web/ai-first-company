@@ -163,7 +163,10 @@ jobs:
           echo "✅ HTML structure checks passed"
 
       - name: Install axe-cli + serve
-        run: npm install -g @axe-core/cli serve --silent
+        run: npm install -g @axe-core/cli serve browser-driver-manager --silent
+
+      - name: Sync Chrome + ChromeDriver versions
+        run: npx browser-driver-manager install chrome
 
       - name: Run axe WCAG 2.1 AA audit
         run: |
