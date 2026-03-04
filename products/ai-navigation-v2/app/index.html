@@ -1,0 +1,2132 @@
+
+
+--- FILE: products/ai-navigation-v2/app/index.html ---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Navigation v2 — Strategisches KI-Modell-Bewertungs- und Monitoring-Framework für Enterprise-Entscheidungsträger. CLEAR-Analysen mit echten LLM-Calls und tenant-spezifische Signal-Filterung.">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com; font-src 'self';">
+  <meta name="theme-color" content="#1d4ed8">
+  <title>AI Navigation v2 — CLEAR-Analyse Dashboard</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    /* ============================================================
+       AI Navigation v2 — Embedded Styles (Bootstrap Phase)
+       Follows: governance/code-standards.md (CSS Architecture)
+       Follows: governance/accessibility-policy.md (WCAG 2.1 AA)
+       ============================================================ */
+
+    /* 1. Custom Properties */
+    :root {
+      /* Colors — all tested against #ffffff for WCAG AA compliance */
+      --color-primary: #1d4ed8;        /* Contrast: 7.2:1 ✓ */
+      --color-primary-hover: #1e40af;
+      --color-primary-light: #dbeafe;
+      --color-secondary: #7c3aed;
+      --color-success: #15803d;        /* Contrast: 5.4:1 ✓ */
+      --color-warning: #92400e;        /* Contrast: 7.2:1 ✓ (text) */
+      --color-warning-bg: #fef3c7;
+      --color-error: #b91c1c;          /* Contrast: 6.1:1 ✓ */
+      --color-error-bg: #fef2f2;
+      --color-text: #111827;           /* Contrast: 17.9:1 ✓ */
+      --color-text-muted: #374151;     /* Contrast: 10.2:1 ✓ */
+      --color-text-subtle: #6b7280;    /* Contrast: 4.6:1 ✓ (large text only) */
+      --color-bg: #ffffff;
+      --color-bg-subtle: #f9fafb;
+      --color-bg-muted: #f3f4f6;
+      --color-border: #d1d5db;
+      --color-border-light: #e5e7eb;
+      --color-focus: #2563eb;
+      --color-focus-ring: rgba(37, 99, 235, 0.4);
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      --space-3xl: 4rem;
+
+      /* Typography */
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+      --font-size-xs: 0.75rem;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.125rem;
+      --font-size-xl: 1.25rem;
+      --font-size-2xl: 1.5rem;
+      --font-size-3xl: 1.875rem;
+      --line-height-tight: 1.25;
+      --line-height-base: 1.5;
+      --line-height-relaxed: 1.75;
+      --font-weight-normal: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+
+      /* Borders */
+      --radius-sm: 0.25rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-full: 9999px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+      /* Layout */
+      --sidebar-width: 260px;
+      --header-height: 64px;
+      --max-content-width: 1200px;
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-base: 200ms ease;
+      --transition-slow: 300ms ease;
+    }
+
+    /* 2. Reset / Base */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 100%; /* 16px base — Monika accessibility */
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-family);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-base);
+      color: var(--color-text);
+      background-color: var(--color-bg-subtle);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 3. Focus styles — WCAG 2.1 AA compliance */
+    :focus-visible {
+      outline: 3px solid var(--color-focus);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    /* 4. Skip Link — accessibility-policy.md PFLICHT */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: var(--space-md);
+      background: var(--color-primary);
+      color: #ffffff;
+      padding: var(--space-sm) var(--space-md);
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      z-index: 10000;
+      transition: top var(--transition-fast);
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* 5. Layout — Dashboard Shell */
+    .app-layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: var(--header-height) 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      min-height: 100vh;
+    }
+
+    /* 6. Header */
+    .app-header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-xl);
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border-light);
+      height: var(--header-height);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    .app-header__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    /* User menu */
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border-light);
+      background: var(--color-bg);
+      cursor: pointer;
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .user-menu:hover {
+      background: var(--color-bg-subtle);
+    }
+
+    .user-menu__avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-sm);
+    }
+
+    .user-menu__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+    }
+
+    .user-menu__tenant {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    /* 7. Sidebar */
+    .app-sidebar {
+      grid-area: sidebar;
+      background: var(--color-text);
+      color: #ffffff;
+      padding: var(--space-lg) 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .app-sidebar__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0 var(--space-lg) var(--space-lg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: var(--space-lg);
+      text-decoration: none;
+      color: #ffffff;
+    }
+
+    .app-sidebar__logo {
+      width: 32px;
+      height: 32px;
+      background: var(--color-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-sm);
+      flex-shrink: 0;
+    }
+
+    .app-sidebar__brand-text {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      letter-spacing: -0.01em;
+    }
+
+    .app-sidebar__version {
+      font-size: var(--font-size-xs);
+      opacity: 0.5;
+      margin-left: var(--space-xs);
+      font-weight: var(--font-weight-normal);
+    }
+
+    /* Navigation */
+    .sidebar-nav__section {
+      padding: 0 var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .sidebar-nav__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.4);
+      padding: 0 var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .sidebar-nav__list {
+      list-style: none;
+    }
+
+    .sidebar-nav__item {
+      margin-bottom: 2px;
+    }
+
+    .sidebar-nav__link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-sm);
+      border-radius: var(--radius-md);
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      transition: background var(--transition-fast), color var(--transition-fast);
+      min-height: 44px;
+    }
+
+    .sidebar-nav__link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .sidebar-nav__link--active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .sidebar-nav__link:focus-visible {
+      outline-color: #ffffff;
+    }
+
+    .sidebar-nav__icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-base);
+    }
+
+    .sidebar-nav__badge {
+      margin-left: auto;
+      background: var(--color-primary);
+      color: #ffffff;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* Sidebar footer */
+    .app-sidebar__footer {
+      margin-top: auto;
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--font-size-xs);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .sidebar-status__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--color-success);
+      flex-shrink: 0;
+    }
+
+    .sidebar-status__dot--warning {
+      background: var(--color-warning);
+    }
+
+    .sidebar-status__dot--error {
+      background: var(--color-error);
+    }
+
+    /* 8. Main Content */
+    .app-main {
+      grid-area: main;
+      padding: var(--space-xl);
+      overflow-y: auto;
+      max-width: var(--max-content-width);
+    }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: var(--space-xl);
+    }
+
+    .page-header__title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      line-height: var(--line-height-tight);
+      margin-bottom: var(--space-xs);
+    }
+
+    .page-header__description {
+      font-size: var(--font-size-base);
+      color: var(--color-text-muted);
+      max-width: 640px;
+    }
+
+    /* 9. Cards */
+    .card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .card__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    .card__subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
+    }
+
+    .card__body {
+      padding: var(--space-lg);
+    }
+
+    .card__footer {
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--color-border-light);
+      background: var(--color-bg-subtle);
+    }
+
+    /* 10. Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    /* Stats cards */
+    .stat-card {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-lg);
+    }
+
+    .stat-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-xl);
+      flex-shrink: 0;
+    }
+
+    .stat-card__icon--primary {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .stat-card__icon--success {
+      background: #dcfce7;
+      color: var(--color-success);
+    }
+
+    .stat-card__icon--warning {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+    }
+
+    .stat-card__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stat-card__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-card__value {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      line-height: var(--line-height-tight);
+    }
+
+    .stat-card__meta {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-subtle);
+      margin-top: var(--space-xs);
+    }
+
+    /* 11. CLEAR Dimensions — Monika: Tooltips + Visual Weight */
+    .clear-dimensions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .clear-dimension {
+      display: grid;
+      grid-template-columns: 140px 1fr auto;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) 0;
+    }
+
+    .clear-dimension__label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    .clear-dimension__letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-sm);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-sm);
+      flex-shrink: 0;
+    }
+
+    /* Tooltip — Monika needs explanations for CLEAR dimensions */
+    .tooltip-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-text-muted);
+      font-size: var(--font-size-xs);
+      cursor: help;
+      flex-shrink: 0;
+      margin-left: var(--space-xs);
+    }
+
+    .tooltip-trigger:hover .tooltip__content,
+    .tooltip-trigger:focus .tooltip__content {
+      display: block;
+    }
+
+    .tooltip__content {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%);
+      background: var(--color-text);
+      color: #ffffff;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      line-height: var(--line-height-base);
+      width: 280px;
+      max-width: 90vw;
+      z-index: 1000;
+      box-shadow: var(--shadow-lg);
+      text-align: left;
+    }
+
+    .tooltip__content::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--color-text);
+    }
+
+    /* Slider track */
+    .clear-dimension__slider-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      width: 100%;
+    }
+
+    .clear-dimension__slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--color-bg-muted);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .clear-dimension__slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      cursor: pointer;
+      border: 2px solid var(--color-bg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .clear-dimension__slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      cursor: pointer;
+      border: 2px solid var(--color-bg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .clear-dimension__slider:focus-visible::-webkit-slider-thumb {
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
+    }
+
+    .clear-dimension__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+      min-width: 40px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Sum validation indicator — not only color-based (Monika: Deuteranomalie) */
+    .clear-sum {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-md);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .clear-sum--valid {
+      background: #dcfce7;
+      color: var(--color-success);
+      border: 1px solid var(--color-success);
+    }
+
+    .clear-sum--invalid {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border: 1px solid var(--color-error);
+    }
+
+    .clear-sum__icon {
+      margin-right: var(--space-sm);
+      font-size: var(--font-size-lg);
+    }
+
+    /* 12. Domain Filter / Tags */
+    .tag-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-bg);
+      min-height: 48px;
+      align-items: center;
+      cursor: text;
+    }
+
+    .tag-input:focus-within {
+      border-color: var(--color-focus);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .tag__remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: transparent;
+      color: var(--color-primary);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-size: var(--font-size-base);
+      line-height: 1;
+      padding: 0;
+      min-width: auto;
+      min-height: auto;
+    }
+
+    .tag__remove:hover {
+      background: var(--color-primary);
+      color: #ffffff;
+    }
+
+    .tag-input__field {
+      border: none;
+      outline: none;
+      flex: 1;
+      min-width: 120px;
+      font-size: var(--font-size-sm);
+      font-family: inherit;
+      background: transparent;
+      padding: var(--space-xs);
+    }
+
+    /* 13. Source Weights */
+    .source-weight {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) 0;
+    }
+
+    .source-weight__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+    }
+
+    .source-weight__slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--color-bg-muted);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .source-weight__slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-full);
+      background: var(--color-secondary);
+      cursor: pointer;
+      border: 2px solid var(--color-bg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .source-weight__slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-full);
+      background: var(--color-secondary);
+      cursor: pointer;
+      border: 2px solid var(--color-bg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .source-weight__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      min-width: 30px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 14. Signal Feed */
+    .signal-list {
+      list-style: none;
+    }
+
+    .signal-item {
+      display: flex;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .signal-item:last-child {
+      border-bottom: none;
+    }
+
+    .signal-item__source {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--color-bg-muted);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-muted);
+    }
+
+    .signal-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .signal-item__title {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      margin-bottom: var(--space-xs);
+    }
+
+    .signal-item__title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .signal-item__title a:hover {
+      color: var(--color-primary);
+      text-decoration: underline;
+    }
+
+    .signal-item__excerpt {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .signal-item__meta {
+      display: flex;
+      gap: var(--space-md);
+      margin-top: var(--space-sm);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-subtle);
+    }
+
+    .signal-item__relevance {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    /* Relevance uses both icon/shape and color — not color alone (Monika: Deuteranomalie) */
+    .relevance-indicator {
+      width: 8px;
+      height: 8px;
+      flex-shrink: 0;
+    }
+
+    .relevance-indicator--high {
+      background: var(--color-success);
+      border-radius: var(--radius-full); /* Circle = high */
+    }
+
+    .relevance-indicator--medium {
+      background: var(--color-warning);
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle = medium */
+    }
+
+    .relevance-indicator--low {
+      background: var(--color-text-subtle);
+      border-radius: 0; /* Square = low */
+    }
+
+    /* 15. CLEAR Results */
+    .clear-result {
+      padding: var(--space-md);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .clear-result__rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      color: #ffffff;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-sm);
+      margin-right: var(--space-sm);
+      flex-shrink: 0;
+    }
+
+    .clear-result__model {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      display: inline;
+    }
+
+    .clear-result__score {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-left: var(--space-sm);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clear-result__reasoning {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      line-height: var(--line-height-relaxed);
+      margin-top: var(--space-sm);
+      padding-left: calc(28px + var(--space-sm));
+    }
+
+    /* 16. History Table */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+    }
+
+    .history-table th {
+      text-align: left;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-muted);
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 2px solid var(--color-border);
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-table td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--color-border-light);
+      color: var(--color-text);
+      vertical-align: middle;
+    }
+
+    .history-table tr:hover td {
+      background: var(--color-bg-subtle);
+    }
+
+    .history-table__date {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .history-table__weights {
+      font-family: var(--font-mono);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .history-table__cost {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 17. Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+      min-height: 44px;
+      min-width: 44px;
+      white-space: nowrap;
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      color: #ffffff;
+      border-color: var(--color-primary);
+    }
+
+    .btn--primary:hover {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+    }
+
+    .btn--primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn--secondary {
+      background: var(--color-bg);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    .btn--secondary:hover {
+      background: var(--color-bg-subtle);
+      border-color: var(--color-text-muted);
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border-color: transparent;
+      padding: var(--space-sm);
+    }
+
+    .btn--ghost:hover {
+      background: var(--color-bg-muted);
+      color: var(--color-text);
+    }
+
+    .btn--danger {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border-color: var(--color-error);
+    }
+
+    .btn--danger:hover {
+      background: var(--color-error);
+      color: #ffffff;
+    }
+
+    .btn--sm {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--font-size-xs);
+      min-height: 32px;
+    }
+
+    /* 18. Forms */
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      margin-bottom: var(--space-xs);
+    }
+
+    .form-hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
+    }
+
+    .form-error {
+      font-size: var(--font-size-xs);
+      color: var(--color-error);
+      margin-top: var(--space-xs);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .form-error::before {
+      content: '⚠';
+      flex-shrink: 0;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: var(--font-size-sm);
+      color: var(--color-text);
+      background: var(--color-bg);
+      min-height: 44px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-input:focus {
+      border-color: var(--color-focus);
+      box-shadow: 0 0 0 3px var(--color-focus-ring);
+      outline: none;
+    }
+
+    .form-input[aria-invalid="true"] {
+      border-color: var(--color-error);
+    }
+
+    .form-input[aria-invalid="true"]:focus {
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.2);
+    }
+
+    /* 19. Alerts / Notices */
+    .alert {
+      display: flex;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-base);
+    }
+
+    .alert--info {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border: 1px solid var(--color-primary);
+    }
+
+    .alert--warning {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+      border: 1px solid var(--color-warning);
+    }
+
+    .alert--error {
+      background: var(--color-error-bg);
+      color: var(--color-error);
+      border: 1px solid var(--color-error);
+    }
+
+    .alert--success {
+      background: #dcfce7;
+      color: var(--color-success);
+      border: 1px solid var(--color-success);
+    }
+
+    .alert__icon {
+      flex-shrink: 0;
+      font-size: var(--font-size-lg);
+    }
+
+    /* 20. Loading / Spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: var(--radius-full);
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-md);
+      padding: var(--space-3xl);
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    /* 21. Empty state */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-3xl) var(--space-xl);
+      color: var(--color-text-muted);
+    }
+
+    .empty-state__icon {
+      font-size: var(--font-size-3xl);
+      margin-bottom: var(--space-md);
+      opacity: 0.5;
+    }
+
+    .empty-state__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      margin-bottom: var(--space-sm);
+    }
+
+    .empty-state__description {
+      font-size: var(--font-size-sm);
+      max-width: 400px;
+      margin: 0 auto var(--space-lg);
+    }
+
+    /* 22. Utility: screen-reader only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* 23. Auth screen */
+    .auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-bg-subtle);
+      padding: var(--space-xl);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-card__logo {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+
+    .auth-card__logo-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--color-primary);
+      border-radius: var(--radius-lg);
+      color: #ffffff;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-xl);
+      margin-bottom: var(--space-sm);
+    }
+
+    .auth-card__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .auth-card__subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
+    }
+
+    /* 24. Section dividers */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--color-border-light);
+      margin: var(--space-xl) 0;
+    }
+
+    /* 25. Responsive */
+    @media (max-width: 768px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--header-height) 1fr;
+        grid-template-areas:
+          "header"
+          "main";
+      }
+
+      .app-sidebar {
+        display: none; /* Mobile: collapsed sidebar — toggle via JS */
+      }
+
+      .app-sidebar--open {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        z-index: 200;
+      }
+
+      .sidebar-overlay {
+        display: none;
+      }
+
+      .sidebar-overlay--visible {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 199;
+      }
+
+      .app-main {
+        padding: var(--space-md);
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .clear-dimension {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+      }
+
+      .clear-dimension__label {
+        margin-bottom: 0;
+      }
+
+      .source-weight {
+        grid-template-columns: 80px 1fr auto;
+      }
+
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-menu-btn {
+        display: none;
+      }
+
+      .sidebar-overlay {
+        display: none;
+      }
+    }
+
+    /* 26. Print styles — PDF export foundation */
+    @media print {
+      .app-sidebar,
+      .app-header,
+      .skip-link,
+      .btn,
+      .mobile-menu-btn {
+        display: none !important;
+      }
+
+      .app-layout {
+        display: block;
+      }
+
+      .app-main {
+        padding: 0;
+        max-width: none;
+      }
+
+      body {
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+      }
+
+      .card {
+        border: 1px solid #ccc;
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      /* Confidentiality notice for PDF export — Monika shares with external consultants */
+      .print-confidential {
+        display: block !important;
+        text-align: center;
+        font-size: 10pt;
+        color: #666;
+        border-top: 1px solid #ccc;
+        padding-top: 12pt;
+        margin-top: 24pt;
+      }
+    }
+
+    @media not print {
+      .print-confidential {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip Link — accessibility-policy.md PFLICHT -->
+  <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+
+  <!-- Auth Screen — shown when not logged in -->
+  <div id="auth-screen" class="auth-screen" hidden>
+    <div class="auth-card">
+      <div class="auth-card__logo">
+        <div class="auth-card__logo-icon" aria-hidden="true">AI</div>
+        <h1 class="auth-card__title">AI Navigation v2</h1>
+        <p class="auth-card__subtitle">Closed Beta — Enterprise Pilot</p>
+      </div>
+
+      <div class="card">
+        <div class="card__body">
+          <div role="alert" aria-live="polite" id="auth-errors" hidden></div>
+
+          <form id="login-form" novalidate>
+            <div class="form-group">
+              <label for="login-email" class="form-label">E-Mail-Adresse</label>
+              <input
+                id="login-email"
+                type="email"
+                name="email"
+                class="form-input"
+                autocomplete="email"
+                required
+                aria-required="true"
+                aria-describedby="login-email-error"
+                aria-invalid="false"
+                placeholder="name@unternehmen.de"
+              >
+              <div id="login-email-error" class="form-error" role="alert" hidden>
+                Bitte geben Sie eine gültige E-Mail-Adresse ein.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="login-password" class="form-label">Passwort</label>
+              <input
+                id="login-password"
+                type="password"
+                name="password"
+                class="form-input"
+                autocomplete="current-password"
+                required
+                aria-required="true"
+                aria-describedby="login-password-error"
+                aria-invalid="false"
+              >
+              <div id="login-password-error" class="form-error" role="alert" hidden>
+                Bitte geben Sie Ihr Passwort ein.
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn--primary" style="width: 100%;">
+              Anmelden
+            </button>
+          </form>
+        </div>
+
+        <div class="card__footer">
+          <p class="form-hint" style="text-align: center;">
+            Closed Beta — Zugang nur mit Einladung. Kontaktieren Sie Ihren Ansprechpartner.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Layout — shown when logged in -->
+  <div id="app-dashboard" class="app-layout" hidden>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="app-sidebar" class="app-sidebar" role="complementary" aria-label="Seitenleiste">
+      <a href="#" class="app-sidebar__brand" aria-label="AI Navigation v2 — Startseite">
+        <div class="app-sidebar__logo" aria-hidden="true">AI</div>
+        <span class="app-sidebar__brand-text">
+          AI Nav
+          <span class="app-sidebar__version">v2</span>
+        </span>
+      </a>
+
+      <nav aria-label="Hauptnavigation">
+        <div class="sidebar-nav__section">
+          <div class="sidebar-nav__label" id="nav-label-main">Übersicht</div>
+          <ul class="sidebar-nav__list" aria-labelledby="nav-label-main">
+            <li class="sidebar-nav__item">
+              <a href="#dashboard" class="sidebar-nav__link sidebar-nav__link--active" data-view="dashboard" aria-current="page">
+                <span class="sidebar-nav__icon" aria-hidden="true">📊</span>
+                Dashboard
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-nav__section">
+          <div class="sidebar-nav__label" id="nav-label-features">Features</div>
+          <ul class="sidebar-nav__list" aria-labelledby="nav-label-features">
+            <li class="sidebar-nav__item">
+              <a href="#domain-filter" class="sidebar-nav__link" data-view="domain-filter">
+                <span class="sidebar-nav__icon" aria-hidden="true">🔍</span>
+                Domain-Filter
+              </a>
+            </li>
+            <li class="sidebar-nav__item">
+              <a href="#clear-analysis" class="sidebar-nav__link" data-view="clear-analysis">
+                <span class="sidebar-nav__icon" aria-hidden="true">⚡</span>
+                CLEAR-Analyse
+              </a>
+            </li>
+            <li class="sidebar-nav__item">
+              <a href="#signal-feed" class="sidebar-nav__link" data-view="signal-feed">
+                <span class="sidebar-nav__icon" aria-hidden="true">📡</span>
+                Signal-Feed
+                <span class="sidebar-nav__badge" id="feed-count" aria-label="Neue Signale">0</span>
+              </a>
+            </li>
+            <li class="sidebar-nav__item">
+              <a href="#history" class="sidebar-nav__link" data-view="history">
+                <span class="sidebar-nav__icon" aria-hidden="true">📋</span>
+                Analyse-History
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-nav__section">
+          <div class="sidebar-nav__label" id="nav-label-admin">Administration</div>
+          <ul class="sidebar-nav__list" aria-labelledby="nav-label-admin">
+            <li class="sidebar-nav__item">
+              <a href="#audit-trail" class="sidebar-nav__link" data-view="audit-trail">
+                <span class="sidebar-nav__icon" aria-hidden="true">🛡️</span>
+                Audit-Trail
+              </a>
+            </li>
+            <li class="sidebar-nav__item">
+              <a href="#usage" class="sidebar-nav__link" data-view="usage">
+                <span class="sidebar-nav__icon" aria-hidden="true">💰</span>
+                Nutzung &amp; Kosten
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="app-sidebar__footer">
+        <div class="sidebar-status">
+          <span class="sidebar-status__dot" id="api-status-dot" aria-hidden="true"></span>
+          <span id="api-status-text">API verbunden</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="app-header" role="banner">
+      <div style="display: flex; align-items: center; gap: var(--space-md);">
+        <button type="button" class="btn btn--ghost mobile-menu-btn" id="mobile-menu-toggle" aria-label="Navigation öffnen" aria-expanded="false" aria-controls="app-sidebar">
+          ☰
+        </button>
+        <h1 class="app-header__title" id="page-title">Dashboard</h1>
+      </div>
+
+      <div class="app-header__actions">
+        <button type="button" class="btn btn--secondary btn--sm" id="btn-export-pdf" aria-label="Aktuelle Ansicht als PDF exportieren">
+          📄 PDF Export
+        </button>
+        <button type="button" class="user-menu" id="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Benutzermenu öffnen">
+          <div class="user-menu__avatar" id="user-avatar" aria-hidden="true">—</div>
+          <div>
+            <div class="user-menu__name" id="user-name">—</div>
+            <div class="user-menu__tenant" id="user-tenant">—</div>
+          </div>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="app-main" role="main">
+
+      <!-- =============================================
+           VIEW: Dashboard (Default)
+           ============================================= -->
+      <section id="view-dashboard" data-view="dashboard" aria-labelledby="dashboard-heading">
+        <div class="page-header">
+          <h2 class="page-header__title" id="dashboard-heading">Willkommen bei AI Navigation v2</h2>
+          <p class="page-header__description">
+            Ihr strategisches KI-Bewertungs-Dashboard. Konfigurieren Sie Ihren Domain-Filter,
+            starten Sie CLEAR-Analysen und behalten Sie relevante KI-Signale im Blick.
+          </p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--primary" aria-hidden="true">📡</div>
+              <div class="stat-card__content">
+                <div class="stat-card__label">Aktive Signale</div>
+                <div class="stat-card__value" id="stat-signals">0</div>
+                <div class="stat-card__meta">Gefiltert nach Ihrer Domain-Konfiguration</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--success" aria-hidden="true">⚡</div>
+              <div class="stat-card__content">
+                <div class="stat-card__label">CLEAR-Analysen</div>
+                <div class="stat-card__value" id="stat-analyses">0</div>
+                <div class="stat-card__meta" id="stat-analyses-meta">Dieser Monat</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--warning" aria-hidden="true">💰</div>
+              <div class="stat-card__content">
+                <div class="stat-card__label">API-Kosten</div>
+                <div class="stat-card__value" id="stat-costs">$0.00</div>
+                <div class="stat-card__meta" id="stat-costs-meta">Dieser Monat</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card" style="margin-bottom: var(--space-xl);">
+          <div class="card__header">
+            <div>
+              <h3 class="card__title">Schnellzugriff</h3>
+              <p class="card__subtitle">Starten Sie mit den wichtigsten Aktionen</p>
+            </div>
+          </div>
+          <div class="card__body">
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-md);">
+              <a href="#clear-analysis" class="btn btn--primary" data-navigate="clear-analysis">
+                ⚡ Neue CLEAR-Analyse
+              </a>
+              <a href="#domain-filter" class="btn btn--secondary" data-navigate="domain-filter">
+                🔍 Domain-Filter konfigurieren
+              </a>
+              <a href="#signal-feed" class="btn btn--secondary" data-navigate="signal-feed">
+                📡 Signal-Feed ansehen
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title">Letzte Aktivitäten</h3>
+          </div>
+          <div class="card__body" id="recent-activity">
+            <div class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">📋</div>
+              <div class="empty-state__title">Noch keine Aktivitäten</div>
+              <p class="empty-state__description">
+                Starten Sie Ihre erste CLEAR-Analyse oder konfigurieren Sie Ihren Domain-Filter, um loszulegen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           VIEW: Domain-Filter-Konfiguration (Feature 1)
+           ============================================= -->
+      <section id="view-domain-filter" data-view="domain-filter" aria-labelledby="domain-filter-heading" hidden>
+        <div class="page-header">
+          <h2 class="page-header__title" id="domain-filter-heading">Domain-Filter-Konfiguration</h2>
+          <p class="page-header__description">
+            Definieren Sie Keywords und Quellen-Gewichtungen, um Ihren Signal-Feed auf Ihre Domäne zuzuschneiden.
+            Änderungen werden sofort gespeichert und der Feed filtert in Echtzeit.
+          </p>
+        </div>
+
+        <!-- Keywords Card -->
+        <div class="card" style="margin-bottom: var(--space-xl);">
+          <div class="card__header">
+            <div>
+              <h3 class="card__title">Domänen-Keywords</h3>
+              <p class="card__subtitle">Begriffe, die für Ihre Branche und Ihren Use Case relevant sind</p>
+            </div>
+          </div>
+          <div class="card__body">
+            <p class="form-hint" style="margin-bottom: var(--space-md);">
+              Keywords bestimmen, zu welchen Themen Sie Signale erhalten.
+              Beispiel: <em>Predictive Maintenance</em>, <em>Computer Vision</em>, <em>LLM Fine-Tuning</em>
+            </p>
+
+            <div
+              id="keywords-list"
+              class="chip-container"
+              role="list"
+              aria-label="Aktive Keywords"
+              aria-live="polite"
+              style="display: flex; flex-wrap: wrap; gap: var(--space-sm); min-height: 2.5rem; margin-bottom: var(--space-md); padding: var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius-md);"
+            >
+              <!-- keyword chips rendered by JS -->
+            </div>
+
+            <div class="form-group">
+              <label for="keyword-input" class="form-label">Keyword hinzufügen</label>
+              <div style="display: flex; gap: var(--space-sm);">
+                <input
+                  id="keyword-input"
+                  type="text"
+                  class="form-input"
+                  placeholder="z. B. Predictive Maintenance"
+                  maxlength="100"
+                  autocomplete="off"
+                  aria-describedby="keyword-hint keyword-error"
+                >
+                <button type="button" class="btn btn--primary" id="btn-add-keyword" aria-label="Keyword hinzufügen">
+                  Hinzufügen
+                </button>
+              </div>
+              <div id="keyword-hint" class="form-hint">
+                Buchstaben, Zahlen, Leerzeichen, Bindestriche erlaubt. Max. 100 Zeichen.
+              </div>
+              <div id="keyword-error" class="form-error" role="alert" hidden></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source Weights Card -->
+        <div class="card" style="margin-bottom: var(--space-xl);">
+          <div class="card__header">
+            <div>
+              <h3 class="card__title">Quellen-Gewichtung</h3>
+              <p class="card__subtitle">Relative Gewichtung der Signal-Quellen (0–100% je Quelle)</p>
+            </div>
+          </div>
+          <div class="card__body">
+            <p class="form-hint" style="margin-bottom: var(--space-lg);">
+              Legen Sie fest, wie stark Signale aus verschiedenen Quellen priorisiert werden.
+              Mindestens eine Quelle muss einen Wert größer 0 haben.
+            </p>
+
+            <div class="form-group">
+              <label for="weight-github" class="form-label">
+                GitHub
+                <span class="form-hint" style="font-weight: normal;"> — Code-Repositories, Issues, Releases</span>
+              </label>
+              <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <input
+                  type="range" id="weight-github" name="weight-github"
+                  min="0" max="100" value="50"
+                  style="flex: 1;"
+                  aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"
+                >
+                <output id="weight-github-output" for="weight-github" class="form-hint" style="min-width: 3ch; text-align: right;">50</output>
+                <span aria-hidden="true">%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="weight-arxiv" class="form-label">
+                arXiv
+                <span class="form-hint" style="font-weight: normal;"> — Wissenschaftliche Paper, Research</span>
+              </label>
+              <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <input
+                  type="range" id="weight-arxiv" name="weight-arxiv"
+                  min="0" max="100" value="30"
+                  style="flex: 1;"
+                  aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"
+                >
+                <output id="weight-arxiv-output" for="weight-arxiv" class="form-hint" style="min-width: 3ch; text-align: right;">30</output>
+                <span aria-hidden="true">%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="weight-hn" class="form-label">
+                Hacker News
+                <span class="form-hint" style="font-weight: normal;"> — Community-Diskussionen, Trends</span>
+              </label>
+              <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <input
+                  type="range" id="weight-hn" name="weight-hn"
+                  min="0" max="100" value="20"
+                  style="flex: 1;"
+                  aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"
+                >
+                <output id="weight-hn-output" for="weight-hn" class="form-hint" style="min-width: 3ch; text-align: right;">20</output>
+                <span aria-hidden="true">%</span>
+              </div>
+            </div>
+
+            <div id="weights-error" class="form-error" role="alert" hidden>
+              Mindestens eine Quelle muss einen Wert größer 0 haben.
+            </div>
+          </div>
+        </div>
+
+        <!-- Relevance Threshold Card -->
+        <div class="card" style="margin-bottom: var(--space-xl);">
+          <div class="card__header">
+            <div>
+              <h3 class="card__title">Relevanz-Schwellwert</h3>
+              <p class="card__subtitle">Wie präzise soll Ihr Signal-Feed gefiltert werden?</p>
+            </div>
+          </div>
+          <div class="card__body">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                <span class="form-hint">Mehr Signale, breitere Abdeckung</span>
+                <span class="form-hint">Weniger Signale, höhere Relevanz</span>
+              </div>
+              <input
+                type="range" id="relevance-threshold" name="relevance-threshold"
+                min="0" max="100" value="60"
+                style="width: 100%;"
+                aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
+                aria-describedby="threshold-label"
+              >
+              <div style="text-align: center; margin-top: var(--space-sm);">
+                <output id="threshold-label" for="relevance-threshold" class="form-hint">
+                  Schwellwert: <strong id="threshold-display">60</strong>%
+                </output>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: var(--space-md); justify-content: flex-end; margin-bottom: var(--space-xl);">
+          <button type="button" class="btn btn--secondary" id="btn-reset-filter">
+            Zurücksetzen
+          </button>
+          <button type="button" class="btn btn--primary" id="btn-save-filter">
+            Einstellungen speichern
+          </button>
+        </div>
+      </section>
+
+      <!-- =============================================
+           VIEW: CLEAR-Dimensions-Analyse (Feature 2)
+           ============================================= -->
+      <section id="view-clear-analysis" data-view="clear-analysis" aria-labelledby="clear-heading" hidden>
+        <div class="page-header">
+          <h2 class="page-header__title" id="clear-heading">CLEAR-Dimensions-Analyse</h2>
+          <p class="page-header__description">
+            Konfigurieren Sie die Gewichtung der fünf CLEAR-Dimensionen und erhalten Sie eine
+            datengestützte KI-Modellempfehlung. Die Summe muss 100% ergeben.
+          </p>
+        </div>
+
+        <!-- Dimension Weights -->
+        <div class="card" style="margin-bottom: var(--space-xl);">
+          <div class="card__header">
+            <div>
+              <h3 class="card__title">CLEAR-Dimensionen gewichten</h3>
+              <p class="card__subtitle">Alle fünf Dimensionen müssen zusammen 100% ergeben</p>
+            </div>
+          </div>
+          <div class="card__body">
+            <div role="group" aria-labelledby="clear-total-label">
+
+              <div class="form-group">
+                <label for="dim-cost" class="form-label">
+                  C — Cost
+                  <span class="form-hint" style="font-weight: normal;"> — Gesamtbetriebskosten des Modells</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <input type="range" id="dim-cost" name="dim-cost" min="0" max="100" value="20"
+                    style="flex: 1;" data-dimension="cost" aria-valuenow="20">
+                  <output id="dim-cost-output" for="dim-cost" class="form-hint" style="min-width: 3ch; text-align: right;">20</output>
+                  <span aria-hidden="true">%</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="dim-latency" class="form-label">
+                  L — Latency
+                  <span class="form-hint" style="font-weight: normal;"> — Antwortzeit und Durchsatz</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <input type="range" id="dim-latency" name="dim-latency" min="0" max="100" value="20"
+                    style="flex: 1;" data-dimension="latency" aria-valuenow="20">
+                  <output id="dim-latency-output" for="dim-latency" class="form-hint" style="min-width: 3ch; text-align: right;">20</output>
+                  <span aria-hidden="true">%</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="dim-efficiency" class="form-label">
+                  E — Efficiency
+                  <span class="form-hint" style="font-weight: normal;"> — Token-Effizienz und Kontextnutzung</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <input type="range" id="dim-efficiency" name="dim-efficiency" min="0" max="100" value="20"
+                    style="flex: 1;" data-dimension="efficiency" aria-valuenow="20">
+                  <output id="dim-efficiency-output" for="dim-efficiency" class="form-hint" style="min-width: 3ch; text-align: right;">20</output>
+                  <span aria-hidden="true">%</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="dim-assurance" class="form-label">
+                  A — Assurance
+                  <span class="form-hint" style="font-weight: normal;"> — Sicherheit, Compliance, Datenschutz</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <input type="range" id="dim-assurance" name="dim-assurance" min="0" max="100" value="20"
+                    style="flex: 1;" data-dimension="assurance" aria-valuenow="20">
+                  <output id="dim-assurance-output" for="dim-assurance" class="form-hint" style="min-width: 3ch; text-align: right;">20</output>
+                  <span aria-hidden="true">%</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="dim-reliability" class="form-label">
+                  R — Reliability
+                  <span class="form-hint" style="font-weight: normal;"> — Verfügbarkeit und Konsistenz</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                  <input type="range" id="dim-reliability" name="dim-reliability" min="0" max="100" value="20"
+                    style="flex: 1;" data-dimension="reliability" aria-valuenow="20">
+                  <output id="dim-reliability-output" for="dim-reliability" class="form-hint" style="min-width: 3ch; text-align: right;">20</output>
+                  <span aria-hidden="true">%</span>
+                </div>
+              </div>
+
+              <!-- Total -->
+              <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md); display: flex; justify-content: space-between; align-items: center;">
+                <span id="clear-total-label" class="form-label">Gesamt:</span>
+                <span id="clear-total-display" aria-live="polite" style="font-size: 1.25rem; font-weight: 600;">100%</span>
+              </div>
+              <div id="clear-total-error" class="form-error" role="alert" hidden>
+                Die Summe muss genau 100% ergeben. Aktuell: <span id="clear-total-current">0</span>%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Context Input -->
+        <div class="card" style="margin-bottom: var(--space-xl);">
+          <div class="card__header">
+            <h3 class="card__title">Analyse-Kontext</h3>
+          </div>
+          <div class="card__body">
+            <div class="form-group">
+              <label for="clear-context" class="form-label">
+                Beschreiben Sie Ihren Use Case
+                <span class="form-hint" style="font-weight: normal;"> (optional — verbessert die Empfehlung)</span>
+              </label>
+              <textarea
+                id="clear-context"
+                class="form-input"
+                rows="3"
+                maxlength="500"
+                placeholder="z. B. Wir benötigen ein Modell für automatische Analyse von Maschinendaten in der Produktion. Latenz kritisch (&lt;2s), DSGVO-Konformität Pflicht."
+                aria-describedby="clear-context-hint"
+              ></textarea>
+              <div id="clear-context-hint" class="form-hint">
+                Max. 500 Zeichen. Wird als Kontext an Claude übergeben — keine personenbezogenen Daten eingeben.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Run Analysis -->
+        <div style="display: flex; align-items: center; gap: var(--space-md); justify-content: flex-end; margin-bottom: var(--space-xl);">
+          <span class="form-hint">Nutzt Claude API — Kosten werden erfasst</span>
+          <button type="button" class="btn btn--primary" id="btn-run-analysis">
+            ⚡ CLEAR-Analyse starten
+          </button>
+        </div>
+
+        <!-- Results (hidden until analysis runs) -->
+        <div id="analysis-result" hidden aria-live="polite">
+          <div class="card" style="margin-bottom: var(--space-xl);">
+            <div class="card__header">
+              <h3 class="card__title">Analyse-Ergebnis</h3>
+            </div>
+            <div class="card__body" id="analysis-result-content">
+              <!-- populated by JS after API call -->
+            </div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="card">
+          <div class="card__header">
+            <h3 class="card__title">Analyse-History</h3>
+            <p class="card__subtitle">Letzte 50 Analysen Ihres Tenants</p>
+          </div>
+          <div class="card__body" id="analysis-history">
+            <div class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">⚡</div>
+              <div class="empty-state__title">Noch keine Analysen</div>
+              <p class="empty-state__description">
+                Starten Sie Ihre erste CLEAR-Analyse, um Ergebnisse hier zu sehen.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           VIEW: Signal-Feed (v3 — Placeholder)
+           ============================================= -->
+      <section id="view-signal-feed" data-view="signal-feed" aria-labelledby="signal-feed-heading" hidden>
+        <div class="page-header">
+          <h2 class="page-header__title" id="signal-feed-heading">Signal-Feed</h2>
+        </div>
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">📡</div>
+              <div class="empty-state__title">Kommt in v3</div>
+              <p class="empty-state__description">
+                Der vollautomatisierte Signal-Feed mit Crawler-Infrastruktur ist für v3 geplant.
+                Domain-Filter-Konfiguration kann bereits jetzt angelegt werden.
+              </p>
+              <a href="#domain-filter" class="btn btn--secondary" data-navigate="domain-filter" style="margin-top: var(--space-md);">
+                Domain-Filter konfigurieren
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           VIEW: History (v3 — redirect to CLEAR)
+           ============================================= -->
+      <section id="view-history" data-view="history" aria-labelledby="history-heading" hidden>
+        <div class="page-header">
+          <h2 class="page-header__title" id="history-heading">Analyse-History</h2>
+        </div>
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">📋</div>
+              <div class="empty-state__title">History im CLEAR-Modul</div>
+              <p class="empty-state__description">
+                Die vollständige Analyse-History finden Sie unter CLEAR-Analyse.
+              </p>
+              <a href="#clear-analysis" class="btn btn--secondary" data-navigate="clear-analysis" style="margin-top: var(--space-md);">
+                Zur CLEAR-Analyse
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           VIEW: Audit-Trail (v3 — Placeholder)
+           ============================================= -->
+      <section id="view-audit-trail" data-view="audit-trail" aria-labelledby="audit-heading" hidden>
+        <div class="page-header">
+          <h2 class="page-header__title" id="audit-heading">Audit-Trail</h2>
+        </div>
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">🛡️</div>
+              <div class="empty-state__title">Kommt in v3</div>
+              <p class="empty-state__description">
+                Der vollständige Audit-Trail aller Tenant-Aktionen ist für v3 geplant.
+                Konfigurationsänderungen werden bereits serverseitig geloggt.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================
+           VIEW: Nutzung & Kosten (v3 — Placeholder)
+           ============================================= -->
+      <section id="view-usage" data-view="usage" aria-labelledby="usage-heading" hidden>
+        <div class="page-header">
+          <h2 class="page-header__title" id="usage-heading">Nutzung &amp; Kosten</h2>
+        </div>
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">💰</div>
+              <div class="empty-state__title">Kommt in v3</div>
+              <p class="empty-state__description">
+                Das Nutzungs- und Kosten-Dashboard ist für v3 geplant.
+                API-Kosten werden bereits erfasst und stehen ab v3 visualisiert zur Verfügung.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /#app-dashboard -->
+
+  <!-- Toast Notification Container -->
+  <div
+    id="toast-container"
+    role="log"
+    aria-live="polite"
+    aria-label="Benachrichtigungen"
+    style="position: fixed; bottom: var(--space-lg); right: var(--space-lg); z-index: 1000; display: flex; flex-direction: column; gap: var(--space-sm);"
+  ></div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" hidden style="position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; display: flex; align-items: center; justify-content: center;">
+    <div role="status" style="background: var(--color-surface); padding: var(--space-xl); border-radius: var(--radius-lg); text-align: center;">
+      <div aria-hidden="true" style="font-size: 2rem; margin-bottom: var(--space-md);">⏳</div>
+      <span>Wird geladen…</span>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
+          <div class="card__body">

@@ -1,0 +1,340 @@
+/* ============================================================
+ * CSS Reset — AI Navigation v2
+ * Modern, accessibility-aware reset based on Josh Comeau's
+ * approach with additions for this product's requirements.
+ *
+ * WHY a custom reset instead of normalize.css:
+ * - Smaller payload (~2KB vs ~8KB)
+ * - Tailored to our token system
+ * - Includes a11y primitives (skip-link, sr-only, reduced-motion)
+ * - No legacy browser hacks (we target browsers <2 years old)
+ * ============================================================ */
+
+/* ──────────────────────────────────────────────────────────
+ * BOX MODEL RESET
+ * Everything uses border-box. No exceptions.
+ * ────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * MARGIN RESET
+ * Remove default margins — spacing is applied intentionally
+ * via layout components using design tokens.
+ * ────────────────────────────────────────────────────────── */
+
+* {
+  margin: 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * DOCUMENT ROOT
+ * ────────────────────────────────────────────────────────── */
+
+html {
+  /* Prevent font-size inflation on mobile rotation */
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+
+  /* Smooth scrolling — but only when not searching (find-in-page) */
+  scroll-behavior: smooth;
+
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
+}
+
+/* WHY: Respect user motion preferences unconditionally */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+ * BODY
+ * ────────────────────────────────────────────────────────── */
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * TYPOGRAPHY RESET
+ * ────────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+p {
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * MEDIA RESET
+ * Images, videos, etc. — block display, responsive by default.
+ * ────────────────────────────────────────────────────────── */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+  font-style: italic; /* Alt text styling when image fails to load */
+}
+
+/* ──────────────────────────────────────────────────────────
+ * FORM ELEMENT RESET
+ * Inherit fonts from parent — browser defaults are inconsistent.
+ * ────────────────────────────────────────────────────────── */
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Remove default button styling */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* Remove spinner from number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Textarea should only resize vertically to prevent layout breaks */
+textarea {
+  resize: vertical;
+}
+
+/* Remove default fieldset styling */
+fieldset {
+  border: none;
+  padding: 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * LINK RESET
+ * ────────────────────────────────────────────────────────── */
+
+a {
+  color: var(--color-text-link);
+  text-decoration-skip-ink: auto;
+}
+
+a:hover {
+  color: var(--color-text-link-hover);
+}
+
+/* ──────────────────────────────────────────────────────────
+ * LIST RESET
+ * Remove default list styles where role="list" is used or
+ * where lists are used for layout (nav menus, etc.).
+ * ────────────────────────────────────────────────────────── */
+
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding: 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * TABLE RESET
+ * ────────────────────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+ * INTERACTIVE ELEMENT DEFAULTS
+ * ────────────────────────────────────────────────────────── */
+
+summary {
+  cursor: pointer;
+}
+
+/* Remove default dialog styling */
+dialog {
+  padding: 0;
+  border: none;
+}
+
+dialog::backdrop {
+  background-color: var(--color-bg-overlay);
+}
+
+/* ──────────────────────────────────────────────────────────
+ * FOCUS MANAGEMENT
+ * WHY: Keyboard navigation is critical for accessibility.
+ * All 6 personas may tab-navigate; Lena's corporate Chrome
+ * may have mouse disabled by policy in some secure zones.
+ * 
+ * Strategy:
+ * - :focus-visible for keyboard users (visible ring)
+ * - :focus for programmatic focus (subtle or no ring)
+ * ────────────────────────────────────────────────────────── */
+
+/* Remove default outline — we replace it with our own */
+:focus {
+  outline: none;
+}
+
+/* Keyboard focus: high-visibility ring using design tokens */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* ──────────────────────────────────────────────────────────
+ * ACCESSIBILITY UTILITIES
+ * These are part of the reset because they are structural
+ * requirements, not optional component styles.
+ * ────────────────────────────────────────────────────────── */
+
+/* Screen-reader only — visually hidden but accessible
+ * WHY: aria-live regions (#status-message, #error-message)
+ * and labels need to be in the DOM but not visible. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Allow sr-only elements to become visible on focus
+ * (used for skip-link) */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+}
+
+/* Skip Link — first focusable element in DOM
+ * WHY: WCAG 2.4.1 Bypass Blocks. Critical for keyboard
+ * users navigating the dashboard repeatedly. Thomas uses
+ * this 2-3x/week; Kai tabs through everything. */
+.skip-link {
+  position: absolute;
+  top: calc(-1 * var(--space-16));
+  left: var(--space-4);
+  z-index: var(--z-skip-link);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-inverse);
+  background-color: var(--color-brand-primary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--ease-out);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: var(--space-4);
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ──────────────────────────────────────────────────────────
+ * SELECTION
+ * Brand-colored text selection for visual polish.
+ * ────────────────────────────────────────────────────────── */
+
+::selection {
+  background-color: var(--color-brand-primary-subtle);
+  color: var(--color-text);
+}
+
+/* ──────────────────────────────────────────────────────────
+ * SCROLLBAR (subtle custom styling for Webkit browsers)
+ * WHY: Default scrollbars are fine functionally but the
+ * custom styling improves visual integration. Falls back
+ * gracefully to native scrollbar in Firefox/non-Webkit.
+ * ────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-300);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-neutral-400);
+}
+
+/* Firefox scrollbar styling */
+@supports (scrollbar-color: auto) {
+  * {
+    scrollbar-color: var(--color-neutral-300) transparent;
+    scrollbar-width: thin;
+  }
+}

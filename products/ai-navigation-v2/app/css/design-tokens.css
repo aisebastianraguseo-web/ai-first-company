@@ -1,0 +1,378 @@
+/* ============================================================
+ * Design Tokens — AI Navigation v2
+ * Single source of truth for all visual design decisions
+ * Version: 0.1.0
+ * 
+ * WHY: Centralized tokens enable consistent theming,
+ * dark-mode support, and accessibility compliance (WCAG 2.1 AA).
+ * Monika's deuteranomaly requirement means we never rely
+ * on color alone — but our palette still needs sufficient
+ * contrast ratios (≥4.5:1 for text, ≥3:1 for UI components).
+ * ============================================================ */
+
+:root {
+  /* ──────────────────────────────────────────────────────────
+   * COLOR SYSTEM
+   * Palette designed for WCAG 2.1 AA contrast compliance.
+   * Each semantic color includes a companion that is safe
+   * for deuteranomaly (red-green color blindness).
+   * ────────────────────────────────────────────────────────── */
+
+  /* Brand */
+  --color-brand-primary: #2563eb;
+  --color-brand-primary-hover: #1d4ed8;
+  --color-brand-primary-active: #1e40af;
+  --color-brand-primary-subtle: #dbeafe;
+  --color-brand-secondary: #7c3aed;
+  --color-brand-secondary-hover: #6d28d9;
+  --color-brand-secondary-subtle: #ede9fe;
+
+  /* Neutral */
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  --color-neutral-950: #030712;
+
+  /* Semantic — Status Colors
+   * WHY these specific hues: Monika has deuteranomaly.
+   * We pair every status color with an icon/pattern so
+   * color is never the sole differentiator. The green and
+   * red are chosen to maximize distinguishability even
+   * under protanopia/deuteranopia simulation. */
+  --color-success: #16a34a;
+  --color-success-subtle: #dcfce7;
+  --color-success-text: #14532d;
+  --color-warning: #d97706;
+  --color-warning-subtle: #fef3c7;
+  --color-warning-text: #78350f;
+  --color-error: #dc2626;
+  --color-error-subtle: #fee2e2;
+  --color-error-text: #7f1d1d;
+  --color-info: #0284c7;
+  --color-info-subtle: #e0f2fe;
+  --color-info-text: #0c4a6e;
+
+  /* Surface & Background */
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f9fafb;
+  --color-bg-muted: #f3f4f6;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Text */
+  --color-text: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+  --color-text-disabled: #9ca3af;
+  --color-text-inverse: #ffffff;
+  --color-text-link: #2563eb;
+  --color-text-link-hover: #1d4ed8;
+  --color-text-link-visited: #7c3aed;
+
+  /* Borders */
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
+  --color-border-focus: #2563eb;
+  --color-border-error: #dc2626;
+
+  /* CLEAR Dimensions — Unique colors for data visualization
+   * WHY 5 distinct hues: Each CLEAR dimension needs its own
+   * visual identity in charts. Selected to be distinguishable
+   * under deuteranomaly (verified with Coblis simulator).
+   * Always paired with pattern/icon, never color-only. */
+  --color-clear-c: #2563eb;   /* Cost — Blue */
+  --color-clear-l: #d97706;   /* Latency — Amber */
+  --color-clear-e: #7c3aed;   /* Ease — Purple */
+  --color-clear-a: #0891b2;   /* Assurance — Cyan */
+  --color-clear-r: #be185d;   /* Reliability — Pink */
+
+  /* ──────────────────────────────────────────────────────────
+   * TYPOGRAPHY
+   * Using system font stack for performance (no font loading).
+   * rem-based sizing for accessibility (user zoom support).
+   * ────────────────────────────────────────────────────────── */
+
+  /* Font Families */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji';
+  --font-family-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono',
+    'Courier New', monospace;
+
+  /* Font Sizes — modular scale (1.25 ratio) */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+  /* ──────────────────────────────────────────────────────────
+   * SPACING
+   * 4px base grid. Consistent spacing reduces cognitive load
+   * (important for Monika's non-technical mental model).
+   * ────────────────────────────────────────────────────────── */
+
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;  /* 2px */
+  --space-1: 0.25rem;     /* 4px */
+  --space-1-5: 0.375rem;  /* 6px */
+  --space-2: 0.5rem;      /* 8px */
+  --space-3: 0.75rem;     /* 12px */
+  --space-4: 1rem;        /* 16px */
+  --space-5: 1.25rem;     /* 20px */
+  --space-6: 1.5rem;      /* 24px */
+  --space-8: 2rem;        /* 32px */
+  --space-10: 2.5rem;     /* 40px */
+  --space-12: 3rem;       /* 48px */
+  --space-16: 4rem;       /* 64px */
+  --space-20: 5rem;       /* 80px */
+  --space-24: 6rem;       /* 96px */
+
+  /* ──────────────────────────────────────────────────────────
+   * BORDERS & RADII
+   * ────────────────────────────────────────────────────────── */
+
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 3px;
+
+  --radius-none: 0;
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-2xl: 1.5rem;   /* 24px */
+  --radius-full: 9999px;
+
+  /* ──────────────────────────────────────────────────────────
+   * SHADOWS
+   * Elevation system for layered UI (modals, dropdowns, cards).
+   * ────────────────────────────────────────────────────────── */
+
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+               0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+               0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+               0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+               0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-none: none;
+
+  /* ──────────────────────────────────────────────────────────
+   * TRANSITIONS & ANIMATION
+   * WHY: Consistent motion reduces perceived complexity.
+   * Respects prefers-reduced-motion (handled in reset.css).
+   * ────────────────────────────────────────────────────────── */
+
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ──────────────────────────────────────────────────────────
+   * LAYOUT
+   * ────────────────────────────────────────────────────────── */
+
+  --container-xs: 20rem;    /* 320px */
+  --container-sm: 24rem;    /* 384px */
+  --container-md: 28rem;    /* 448px */
+  --container-lg: 32rem;    /* 512px */
+  --container-xl: 36rem;    /* 576px */
+  --container-2xl: 42rem;   /* 672px */
+  --container-3xl: 48rem;   /* 768px */
+  --container-4xl: 56rem;   /* 896px */
+  --container-5xl: 64rem;   /* 1024px */
+  --container-6xl: 72rem;   /* 1152px */
+  --container-7xl: 80rem;   /* 1280px */
+  --container-max: 90rem;   /* 1440px */
+
+  /* Sidebar */
+  --sidebar-width: 16rem;        /* 256px */
+  --sidebar-width-collapsed: 4rem; /* 64px */
+
+  /* ──────────────────────────────────────────────────────────
+   * Z-INDEX SCALE
+   * WHY: Explicit z-index scale prevents stacking wars.
+   * ────────────────────────────────────────────────────────── */
+
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+  --z-skip-link: 999;
+
+  /* ──────────────────────────────────────────────────────────
+   * FOCUS
+   * High-visibility focus ring for keyboard navigation.
+   * 3px offset ensures visibility against all backgrounds.
+   * ────────────────────────────────────────────────────────── */
+
+  --focus-ring-width: 3px;
+  --focus-ring-color: var(--color-brand-primary);
+  --focus-ring-offset: 2px;
+  --focus-ring: var(--focus-ring-width) solid var(--focus-ring-color);
+
+  /* ──────────────────────────────────────────────────────────
+   * BREAKPOINTS (as reference — used in media queries)
+   * Mobile-first: these are min-width values.
+   * sm: 640px | md: 768px | lg: 1024px | xl: 1280px | 2xl: 1536px
+   * ────────────────────────────────────────────────────────── */
+}
+
+/* ──────────────────────────────────────────────────────────
+ * DARK MODE OVERRIDES
+ * WHY: Some users (Kai on Linux) may prefer dark mode.
+ * System preference detection. Manual toggle uses
+ * [data-theme="dark"] on <html>.
+ * ────────────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0f172a;
+    --color-bg-subtle: #1e293b;
+    --color-bg-muted: #334155;
+    --color-bg-elevated: #1e293b;
+    --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+    --color-text: #f1f5f9;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-text-disabled: #64748b;
+    --color-text-inverse: #0f172a;
+    --color-text-link: #60a5fa;
+    --color-text-link-hover: #93bbfd;
+
+    --color-border: #334155;
+    --color-border-strong: #475569;
+    --color-border-focus: #60a5fa;
+
+    --color-brand-primary: #3b82f6;
+    --color-brand-primary-hover: #60a5fa;
+    --color-brand-primary-subtle: #1e3a5f;
+    --color-brand-secondary: #8b5cf6;
+    --color-brand-secondary-subtle: #2e1a5e;
+
+    --color-success: #22c55e;
+    --color-success-subtle: #14532d;
+    --color-success-text: #bbf7d0;
+    --color-warning: #f59e0b;
+    --color-warning-subtle: #78350f;
+    --color-warning-text: #fef3c7;
+    --color-error: #ef4444;
+    --color-error-subtle: #7f1d1d;
+    --color-error-text: #fecaca;
+    --color-info: #38bdf8;
+    --color-info-subtle: #0c4a6e;
+    --color-info-text: #e0f2fe;
+
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4),
+                 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
+                 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
+                 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+
+    /* CLEAR Dimensions — adjusted for dark backgrounds */
+    --color-clear-c: #60a5fa;
+    --color-clear-l: #fbbf24;
+    --color-clear-e: #a78bfa;
+    --color-clear-a: #22d3ee;
+    --color-clear-r: #f472b6;
+  }
+}
+
+[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-bg-subtle: #1e293b;
+  --color-bg-muted: #334155;
+  --color-bg-elevated: #1e293b;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-disabled: #64748b;
+  --color-text-inverse: #0f172a;
+  --color-text-link: #60a5fa;
+  --color-text-link-hover: #93bbfd;
+
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-border-focus: #60a5fa;
+
+  --color-brand-primary: #3b82f6;
+  --color-brand-primary-hover: #60a5fa;
+  --color-brand-primary-subtle: #1e3a5f;
+  --color-brand-secondary: #8b5cf6;
+  --color-brand-secondary-subtle: #2e1a5e;
+
+  --color-success: #22c55e;
+  --color-success-subtle: #14532d;
+  --color-success-text: #bbf7d0;
+  --color-warning: #f59e0b;
+  --color-warning-subtle: #78350f;
+  --color-warning-text: #fef3c7;
+  --color-error: #ef4444;
+  --color-error-subtle: #7f1d1d;
+  --color-error-text: #fecaca;
+  --color-info: #38bdf8;
+  --color-info-subtle: #0c4a6e;
+  --color-info-text: #e0f2fe;
+
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4),
+               0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
+               0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
+               0 4px 6px -4px rgba(0, 0, 0, 0.3);
+
+  --color-clear-c: #60a5fa;
+  --color-clear-l: #fbbf24;
+  --color-clear-e: #a78bfa;
+  --color-clear-a: #22d3ee;
+  --color-clear-r: #f472b6;
+}

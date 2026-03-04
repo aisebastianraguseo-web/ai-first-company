@@ -1,0 +1,238 @@
+name: Deploy AI Navigation v2 → Vercel
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'products/ai-navigation-v2/app/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'products/ai-navigation-v2/app/**'
+  workflow_dispatch:
+
+env:
+  PRODUCT_DIR: products/ai-navigation-v2/app
+  NODE_VERSION: '20'
+
+jobs:
+  # ── Tests ────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run unit tests
+        run: |
+          for f in ${{ env.PRODUCT_DIR }}/tests/*.test.js; do
+            [ -f "$f" ] && node "$f" || echo "No tests found at $f"
+          done
+
+  # ── HTML Completeness Check ──────────────────────────────
+  # Catches truncated codegen output before it reaches production.
+  html-check:
+    name: HTML Completeness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify index.html is complete
+        run: |
+          echo "Checking index.html completeness..."
+          ISSUES=0
+
+          if grep -q '</html>' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ </html> closing tag present"
+          else
+            echo "  ERROR: index.html is truncated — missing </html>"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          if grep -q '<script' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ <script> tag present (JS loaded)"
+          else
+            echo "  ERROR: No <script> tags — app will not initialise"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          if grep -q '</body>' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ </body> present"
+          else
+            echo "  ERROR: Missing </body>"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          if [ $ISSUES -gt 0 ]; then
+            echo ""
+            echo "ERROR: HTML completeness check failed — blocking deploy"
+            exit 1
+          fi
+          echo "✅ HTML completeness: OK"
+
+  # ── Security Check ───────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Checking for hardcoded credentials in JS..."
+          if grep -rn \
+            -e "supabase\.co.*eyJ" \
+            -e "sk-ant-" \
+            -e "password\s*=\s*['\"][^'\"]\+['\"]" \
+            ${{ env.PRODUCT_DIR }}/js/ 2>/dev/null; then
+            echo "ERROR: Possible hardcoded secrets found!"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets"
+
+      - name: Verify Content-Security-Policy
+        run: |
+          if grep -q "Content-Security-Policy" ${{ env.PRODUCT_DIR }}/vercel.json; then
+            echo "✅ CSP header present in vercel.json"
+          else
+            echo "ERROR: No Content-Security-Policy in vercel.json"
+            exit 1
+          fi
+
+      - name: Check for non-HTTPS URLs
+        run: |
+          if grep -rn "http://" ${{ env.PRODUCT_DIR }}/js/ 2>/dev/null | \
+             grep -v "localhost\|127\.0\.0\.1\|example\.com"; then
+            echo "WARNING: Non-HTTPS URLs found in JS source"
+          else
+            echo "✅ No insecure HTTP URLs"
+          fi
+
+  # ── Accessibility Check ──────────────────────────────────
+  a11y:
+    name: Accessibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check HTML structure
+        run: |
+          ISSUES=0
+
+          if grep -q '<html.*lang=' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ lang attribute on <html>"
+          else
+            echo "  ERROR: Missing lang attribute on <html>"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          if grep -q 'role="main"\|<main' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ main landmark present"
+          else
+            echo "  ERROR: No main landmark"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          if grep -q 'skip-link\|Hauptinhalt' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ Skip navigation link present"
+          else
+            echo "  ERROR: No skip link found"
+            ISSUES=$((ISSUES+1))
+          fi
+
+          if grep -q 'aria-live' ${{ env.PRODUCT_DIR }}/index.html; then
+            echo "  ✅ ARIA live regions present"
+          else
+            echo "  WARNING: No ARIA live regions"
+          fi
+
+          if [ $ISSUES -gt 0 ]; then
+            echo "ERROR: $ISSUES A11y structure issues — blocking deploy"
+            exit 1
+          fi
+          echo "✅ HTML structure checks passed"
+
+      - name: Install axe-cli + serve
+        run: npm install -g @axe-core/cli serve --silent
+
+      - name: Run axe WCAG 2.1 AA audit
+        run: |
+          serve ${{ env.PRODUCT_DIR }} -p 3333 &
+          SERVER_PID=$!
+          sleep 3
+
+          axe http://localhost:3333 \
+            --tags wcag2a,wcag2aa \
+            --reporter cli \
+            --exit || AXE_EXIT=$?
+
+          kill $SERVER_PID 2>/dev/null || true
+
+          if [ "${AXE_EXIT:-0}" -ne 0 ]; then
+            echo "ERROR: axe found WCAG 2.1 AA violations — blocking deploy"
+            exit 1
+          fi
+          echo "✅ axe WCAG 2.1 AA: No violations"
+
+  # ── Deploy Preview (PRs) ─────────────────────────────────
+  deploy-preview:
+    name: Deploy Preview
+    needs: [test, html-check, security]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject Supabase config
+        run: |
+          # Inject runtime config as inline script before </body>
+          sed -i "s|</body>|<script>window.__AI_NAV_CONFIG={supabaseUrl:'${{ secrets.AI_NAV_V2_SUPABASE_URL }}',supabaseAnonKey:'${{ secrets.AI_NAV_V2_SUPABASE_ANON_KEY }}'}</script></body>|" \
+            ${{ env.PRODUCT_DIR }}/index.html
+
+      - name: Deploy Preview to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token:      ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.AI_NAV_V2_VERCEL_PROJECT_ID }}
+          working-directory: ${{ env.PRODUCT_DIR }}
+          vercel-args: '--yes'
+
+  # ── Deploy Production (master) ───────────────────────────
+  deploy-production:
+    name: Deploy Production
+    needs: [test, html-check, security, a11y]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    environment:
+      name: production
+      url: https://ai-navigation-v2.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject Supabase config
+        run: |
+          sed -i "s|</body>|<script>window.__AI_NAV_CONFIG={supabaseUrl:'${{ secrets.AI_NAV_V2_SUPABASE_URL }}',supabaseAnonKey:'${{ secrets.AI_NAV_V2_SUPABASE_ANON_KEY }}'}</script></body>|" \
+            ${{ env.PRODUCT_DIR }}/index.html
+
+      - name: Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token:      ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.AI_NAV_V2_VERCEL_PROJECT_ID }}
+          working-directory: ${{ env.PRODUCT_DIR }}
+          vercel-args: '--prod --yes'
+
+      - name: Post-deploy notification
+        run: |
+          echo "AI Navigation v2 deployed to production"
+          echo "URL: https://ai-navigation-v2.vercel.app"

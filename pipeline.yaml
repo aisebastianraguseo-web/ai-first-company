@@ -1,0 +1,662 @@
+# pipeline.yaml — Machine-Readable Pipeline DAG
+# AI-First Company | Version 1.1 | 2026-02-28
+#
+# Used by: orchestrator/pipeline.py
+# Template variables: {product_id}, {feature_name}, {timestamp}
+#
+# WICHTIG: Dies ist das globale Pipeline-Template.
+# Der Environment Architect Agent generiert produktspezifische Pipelines
+# unter: products/{product_id}/environment/pipeline.yaml
+# Nicht alle Phasen sind für alle Produkte aktiv (abhängig von complexity_tier).
+# ============================================================
+
+version: "1.1"
+default_model: "claude-opus-4-6"
+default_max_tokens: 16000
+
+# ── Global Defaults ────────────────────────────────────────
+defaults:
+  retry:
+    max_attempts: 2
+    on_failure: escalate
+  timeout_hours: 4
+  log_all_actions: true
+
+# ── Phase Aktivierung nach Tier ────────────────────────────
+# simple:    [bootstrap, personas, specs, build, gate]
+# standard:  [environment, bootstrap, personas, specs, build, test, gate]
+# moderate:  [environment, domain, bootstrap, personas, specs, build, test, gate]
+# complex:   [environment, domain, compliance, bootstrap, personas, specs, build, test, integration_gate, gate]
+# enterprise: [all phases]
+
+# ── Phases ─────────────────────────────────────────────────
+phases:
+
+  # ── Phase 0a: Environment Setup (NEU) ─────────────────────
+  # Aktiv für: alle Produkte (ab standard)
+  - id: environment_setup
+    name: "Environment Architect — Produktspezifische Umgebung generieren"
+    autonomy: BATCH_APPROVAL
+    active_for_tiers: [standard, moderate, complex, enterprise]
+    depends_on: []
+    parallel: false
+    checkpoint:
+      type: human_approval
+      message: "Environment-Manifest für {product_id} bereit. Bitte prüfen: products/{product_id}/environment/environment-manifest.yaml"
+      timeout_hours: 48
+      on_timeout: escalate
+      on_rejection: abort
+    agents:
+      - id: environment-architect
+        prompt: agents/meta/environment-architect.md
+        interface: agents/interfaces/environment-architect.yaml
+        context_files:
+          - intake/{product_id}.yaml
+          - intake/product-dna-schema.yaml
+          - governance/autonomy-matrix.yaml
+          - pipeline.yaml
+          - agents/templates/
+        output_files:
+          - products/{product_id}/environment/environment-manifest.yaml
+          - products/{product_id}/environment/pipeline.yaml
+          - products/{product_id}/autonomy.yaml
+        output_format: yaml
+        context_size: medium
+        thinking_strategy: two_pass
+        thinking_budget_tokens: 8000
+        max_output_tokens: 12000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 500
+          required_keys: [environment_manifest.complexity, environment_manifest.agents_generated, environment_manifest.pipeline_phases]
+    validation:
+      required_files:
+        - products/{product_id}/environment/environment-manifest.yaml
+        - products/{product_id}/autonomy.yaml
+      required_fields:
+        - complexity.tier
+        - agents_generated
+        - pipeline_phases
+
+  # ── Phase 0b: Domain Expert Review (NEU) ─────────────────
+  # Aktiv für: moderate, complex, enterprise
+  - id: domain_expert_review
+    name: "Domain Expert — Fachliche Validierung"
+    autonomy: BATCH_APPROVAL
+    active_for_tiers: [moderate, complex, enterprise]
+    depends_on: [environment_setup]
+    parallel: true
+    checkpoint:
+      type: human_approval
+      message: "Domain Expert Findings für {product_id} bereit. Bitte prüfen: products/{product_id}/domain/"
+      timeout_hours: 48
+      on_timeout: escalate
+      on_rejection: revise
+    agents:
+      - id: domain-expert
+        # Produktspezifischer Agent — Pfad aus environment-manifest
+        prompt: products/{product_id}/environment/agents/domain-experts/{domain_expert_name}.md
+        context_files:
+          - intake/{product_id}.yaml
+          - products/{product_id}/environment/environment-manifest.yaml
+        output_files:
+          - products/{product_id}/domain/constraints.yaml
+          - products/{product_id}/domain/risks.yaml
+          - products/{product_id}/domain/expert-review.md
+        output_format: mixed
+        context_size: medium
+        thinking_strategy: fixed_budget
+        thinking_budget_tokens: 4000
+        max_output_tokens: 8000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 200
+
+      - id: compliance-identifier
+        prompt: agents/meta/compliance-identifier.md
+        interface: agents/interfaces/compliance-identifier.yaml
+        context_files:
+          - intake/{product_id}.yaml
+          - agents/templates/compliance-agent-base.md
+        output_files:
+          - products/{product_id}/compliance/compliance-matrix.yaml
+          - products/{product_id}/compliance/summary-for-human.md
+        output_format: mixed
+        context_size: small
+        parallel: true
+        thinking_strategy: fixed_budget
+        thinking_budget_tokens: 2000
+        max_output_tokens: 6000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 100
+
+    validation:
+      required_files:
+        - products/{product_id}/domain/constraints.yaml
+        - products/{product_id}/compliance/compliance-matrix.yaml
+      gate: "Keine Blocker in domain/constraints.yaml"
+
+  # ── Phase 1: Personas ─────────────────────────────────────
+  - id: personas
+    name: "Persona Generation"
+    autonomy: FULL
+    depends_on: []
+    parallel: false
+    checkpoint: none
+    agents:
+      - id: persona-architect
+        prompt: agents/meta/persona-architect.md
+        interface: agents/interfaces/persona-architect.yaml
+        context_files:
+          - intake/{product_id}.yaml
+          - state/project-learnings.yaml
+        output_files:
+          - products/{product_id}/personas/variables.yaml
+        output_format: yaml
+        context_size: small
+        slim_mode: false
+        thinking_strategy: two_pass
+        thinking_budget_tokens: 4000
+        max_output_tokens: 8000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 200
+    validation:
+      min_personas: 5
+      require_adversarial: true
+      output_file: products/{product_id}/personas/variables.yaml
+    retry:
+      max_attempts: 2
+      on_failure: escalate
+
+  # ── Phase 2: Specs ────────────────────────────────────────
+  - id: specs
+    name: "Specification Writing"
+    autonomy: BATCH_APPROVAL
+    depends_on: [personas]
+    parallel: true
+    checkpoint:
+      type: human_approval
+      message_template: templates/spec-review-message.md
+      timeout_hours: 72
+      on_timeout: escalate
+      on_rejection: abort
+    agents:
+      - id: spec-writer-scope
+        prompt: agents/meta/spec-writer.md
+        interface: agents/interfaces/spec-writer.yaml
+        context_files:
+          - agents/meta/spec-writer.md
+          - intake/{product_id}.yaml
+          - products/{product_id}/personas/variables.yaml
+          - products/{product_id}/domain/expert-review.md
+        output_files:
+          - products/{product_id}/specs/product-vision.md
+          - products/{product_id}/specs/mvp-scope.md
+        output_format: markdown
+        context_size: medium
+        parallel: false
+        thinking_strategy: fixed_budget
+        thinking_budget_tokens: 4000
+        max_output_tokens: 12000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 500
+
+      - id: spec-writer-feature
+        prompt: agents/meta/spec-writer.md
+        interface: agents/interfaces/spec-writer.yaml
+        context_files:
+          - agents/meta/spec-writer.md
+          - intake/{product_id}.yaml
+          - products/{product_id}/specs/product-vision.md
+          - products/{product_id}/personas/variables.yaml
+          - products/{product_id}/specs/mvp-scope.md
+        output_files:
+          - products/{product_id}/specs/feature-{feature_name}.md
+        output_format: markdown
+        context_size: medium
+        parallel: true
+        for_each: "{product_id}.mvp_features"
+        depends_on_subtask: [spec-writer-scope]
+        thinking_strategy: fixed_budget
+        thinking_budget_tokens: 4000
+        max_output_tokens: 12000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 500
+
+      - id: infrastructure-check
+        prompt: agents/specialized/infrastructure-agent.md
+        interface: agents/interfaces/infrastructure-agent.yaml
+        context_files:
+          - agents/specialized/infrastructure-agent.md
+          - products/{product_id}/specs/product-vision.md
+          - products/{product_id}/specs/mvp-scope.md
+          - state/architecture-decisions.yaml
+        output_files:
+          - state/architecture-decisions.yaml
+        output_format: yaml_append
+        context_size: small
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 8000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+
+      - id: contrarian-review
+        prompt: exploration/contrarian-agent.md
+        interface: agents/interfaces/contrarian-agent.yaml
+        context_files:
+          - exploration/contrarian-agent.md
+          - products/{product_id}/specs/product-vision.md
+          - products/{product_id}/specs/mvp-scope.md
+          - products/{product_id}/personas/variables.yaml
+        output_files:
+          - products/{product_id}/feedback/processed/contrarian/pre-build.yaml
+        output_format: yaml
+        context_size: medium
+        parallel: true
+        thinking_strategy: fixed_budget
+        thinking_budget_tokens: 2000
+        max_output_tokens: 6000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+
+  # ── Phase 3: Code Generation ──────────────────────────────
+  - id: codegen
+    name: "Code Generation"
+    autonomy: FULL
+    depends_on: [specs]
+    parallel: true
+    checkpoint: none
+    agents:
+      # HTML is split into 3 bounded agents to stay within token limits.
+      # Each agent outputs a partial file; gen-html-finalize assembles index.html.
+      # Scale: more features → more view agents, each stays <10k tokens.
+
+      - id: gen-html-shell
+        # Generates: document shell (head, CSS links, auth screen, app layout,
+        # sidebar nav, header, main wrapper opening tag).
+        # Max ~400 lines. Does NOT include view sections or closing tags.
+        prompt: agents/meta/product-bootstrapper.md
+        interface: agents/interfaces/product-bootstrapper.yaml
+        context_files:
+          - governance/code-standards.md
+          - governance/accessibility-policy.md
+          - products/{product_id}/specs/product-vision.md
+          - products/{product_id}/specs/mvp-scope.md
+          - products/{product_id}/personas/variables.yaml
+          - products/{product_id}/specs/design-system.yaml
+        output_files:
+          - products/{product_id}/app/_partials/shell.html
+        output_format: html
+        context_size: medium
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 10000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 200
+
+      - id: gen-html-views
+        # Generates: all view <section> blocks (dashboard, feature views, v3 placeholders).
+        # One section per MVP feature + one per out-of-scope nav item.
+        # Reads shell for class/id conventions. Does NOT include shell or closing tags.
+        prompt: agents/meta/product-bootstrapper.md
+        interface: agents/interfaces/product-bootstrapper.yaml
+        context_files:
+          - products/{product_id}/app/_partials/shell.html
+          - products/{product_id}/specs/feature-*.md
+          - products/{product_id}/specs/mvp-scope.md
+          - products/{product_id}/personas/variables.yaml
+          - governance/accessibility-policy.md
+        output_files:
+          - products/{product_id}/app/_partials/views.html
+        output_format: html
+        context_size: medium
+        parallel: false
+        depends_on_subtask: [gen-html-shell]
+        thinking_strategy: disabled
+        max_output_tokens: 12000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 200
+
+      - id: gen-html-finalize
+        # Assembles the final index.html from partials:
+        # shell.html + views.html + toast/loading overlays + <script type="module"> tags + </body></html>
+        # Also injects env-config placeholder for Supabase credentials.
+        prompt: agents/meta/product-bootstrapper.md
+        interface: agents/interfaces/product-bootstrapper.yaml
+        context_files:
+          - products/{product_id}/app/_partials/shell.html
+          - products/{product_id}/app/_partials/views.html
+          - products/{product_id}/app/js/
+          - governance/security-policy.md
+        output_files:
+          - products/{product_id}/app/index.html
+        output_format: html
+        context_size: medium
+        parallel: false
+        depends_on_subtask: [gen-html-views]
+        thinking_strategy: disabled
+        max_output_tokens: 6000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 200
+          required_content: ["</html>", "<script"]
+
+      - id: gen-css
+        prompt: agents/meta/product-bootstrapper.md
+        interface: agents/interfaces/product-bootstrapper.yaml
+        context_files:
+          - governance/code-standards.md
+          - products/{product_id}/specs/design-system.yaml
+          - products/{product_id}/personas/variables.yaml
+        output_files:
+          - products/{product_id}/app/css/design-tokens.css
+          - products/{product_id}/app/css/reset.css
+          - products/{product_id}/app/css/app.css
+          - products/{product_id}/app/css/components.css
+        output_format: css
+        context_size: medium
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 16000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 100
+
+      - id: gen-js-services
+        prompt: agents/meta/product-bootstrapper.md
+        interface: agents/interfaces/product-bootstrapper.yaml
+        context_files:
+          - governance/code-standards.md
+          - governance/security-policy.md
+          - products/{product_id}/specs/feature-*.md
+          - state/project-learnings.yaml
+        output_files:
+          - products/{product_id}/app/js/storage.js
+          - products/{product_id}/app/js/*.js
+          - products/{product_id}/app/js/app.js
+        output_format: javascript
+        context_size: large
+        parallel: false
+        depends_on_subtask: [gen-html-finalize, gen-css]
+        thinking_strategy: disabled
+        max_output_tokens: 16000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 200
+
+      - id: gen-tests-pwa
+        prompt: agents/meta/product-bootstrapper.md
+        interface: agents/interfaces/product-bootstrapper.yaml
+        context_files:
+          - products/{product_id}/specs/feature-*.md
+          - governance/quality-gates.md
+        output_files:
+          - products/{product_id}/app/tests/*.test.js
+          - products/{product_id}/app/manifest.json
+          - products/{product_id}/app/service-worker.js
+        output_format: javascript
+        context_size: medium
+        parallel: false
+        depends_on_subtask: [gen-js-services]
+        thinking_strategy: disabled
+        max_output_tokens: 12000
+        max_retries: 2
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 100
+
+  # ── Phase 4: Quality Gates ────────────────────────────────
+  - id: gates
+    name: "Quality Gates"
+    autonomy: FULL
+    depends_on: [codegen]
+    parallel: true
+    checkpoint: none
+    agents:
+      - id: security-gate
+        prompt: agents/specialized/security-challenger.md
+        interface: agents/interfaces/security-challenger.yaml
+        context_files:
+          - agents/specialized/security-challenger.md
+          - products/{product_id}/app/js/
+          - products/{product_id}/app/index.html
+        output_files:
+          - products/{product_id}/state/gate-reports/security-{timestamp}.yaml
+        output_format: yaml
+        context_size: medium
+        slim_mode: js_and_html
+        blocking: true
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 8000
+        max_retries: 1
+        outcome_validation:
+          allow_empty: false
+
+      - id: a11y-gate
+        prompt: agents/specialized/accessibility-challenger.md
+        interface: agents/interfaces/accessibility-challenger.yaml
+        context_files:
+          - agents/specialized/accessibility-challenger.md
+          - products/{product_id}/app/index.html
+          - products/{product_id}/app/css/
+        output_files:
+          - products/{product_id}/state/gate-reports/a11y-{timestamp}.yaml
+        output_format: yaml
+        context_size: small
+        slim_mode: false
+        blocking: true
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 6000
+        max_retries: 1
+        outcome_validation:
+          allow_empty: false
+
+      - id: quality-gate
+        prompt: agents/specialized/quality-gate.md
+        interface: agents/interfaces/quality-gate.yaml
+        context_files:
+          - agents/specialized/quality-gate.md
+          - products/{product_id}/app/
+          - products/{product_id}/specs/mvp-scope.md
+          - products/{product_id}/specs/design-system.yaml
+        output_files:
+          - products/{product_id}/state/gate-reports/quality-{timestamp}.yaml
+        output_format: yaml
+        context_size: large
+        slim_mode: false
+        blocking: true
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 12000
+        max_retries: 1
+        outcome_validation:
+          allow_empty: false
+
+      - id: performance-gate
+        prompt: agents/specialized/performance-advisor.md
+        interface: agents/interfaces/performance-advisor.yaml
+        context_files:
+          - agents/specialized/performance-advisor.md
+          - products/{product_id}/app/
+        output_files:
+          - products/{product_id}/state/gate-reports/performance-{timestamp}.yaml
+        output_format: yaml
+        context_size: medium
+        blocking: false
+        parallel: true
+        thinking_strategy: disabled
+        max_output_tokens: 8000
+        max_retries: 1
+        outcome_validation:
+          allow_empty: false
+
+  # ── Phase 5: Auto-Fix Loop ────────────────────────────────
+  - id: autofix
+    name: "Automatic Fix Loop"
+    autonomy: FULL
+    depends_on: [gates]
+    parallel: false
+    checkpoint:
+      type: human_required_if_escalated
+      trigger: retries_exhausted
+      message: "Manual fix required for {violation.id}: {violation.title}"
+    agents:
+      - id: code-fixer
+        prompt: agents/specialized/code-fixer.md
+        interface: agents/interfaces/code-fixer.yaml
+        context_files:
+          - agents/specialized/code-fixer.md
+          - "{violation.file}"
+          - "{violation.spec_reference}"
+        output_files:
+          - "{violation.file}"
+          - state/autonomous-actions-log.yaml
+        output_format: patch
+        context_size: small
+        for_each: "gate_violations[auto_fixable=true]"
+        max_retries: 3
+        on_retry_exhausted: human_required
+        parallel: false
+        after_fix:
+          rerun_gate: true       # re-run the specific gate after each fix
+          log_to_autonomous: true
+        thinking_strategy: disabled
+        max_output_tokens: 8000
+        outcome_validation:
+          allow_empty: false
+
+  # ── Phase 6: Deploy Preparation ──────────────────────────
+  # Always HUMAN REQUIRED — per governance (autonomy-matrix.yaml: "Deployment to Production")
+  # This phase generates deploy infrastructure (vercel.json + GitHub Action).
+  # Actual deployment is triggered by: push to master → GitHub Action → Vercel.
+  - id: deploy
+    name: "Deploy Preparation"
+    autonomy: HUMAN_REQUIRED
+    depends_on: [autofix]
+    parallel: false
+    checkpoint:
+      type: human_required
+      message: |
+        Deploy-Infrastruktur für {product_id} generiert. Nächste Schritte:
+
+        1. Prüfen: products/{product_id}/app/vercel.json
+        2. Prüfen: .github/workflows/deploy-{product_id}.yml
+        3. Supabase-Projekt erstellen (falls neu):
+           → supabase.com → New Project → Schema aus products/{product_id}/specs/ deployen
+        4. GitHub Secrets setzen (Settings → Secrets → Actions):
+           - VERCEL_TOKEN          → vercel.com/account/tokens
+           - VERCEL_ORG_ID         → vercel.com (Account Settings)
+           - {PRODUCT_ID}_VERCEL_PROJECT_ID  → nach erstem Vercel CLI Login
+           - {PRODUCT_ID}_SUPABASE_URL       → supabase.com/project/xxx/settings/api
+           - {PRODUCT_ID}_SUPABASE_ANON_KEY  → supabase.com/project/xxx/settings/api
+        5. push to master → GitHub Action deployed automatisch
+      timeout_hours: 168
+      on_timeout: escalate
+      on_rejection: abort
+    agents:
+      - id: deploy-prep
+        # Generates vercel.json + GitHub Action workflow for this product.
+        # Uses expense-tracker deploy config as reference pattern.
+        prompt: agents/specialized/infrastructure-agent.md
+        context_files:
+          - products/{product_id}/environment/environment-manifest.yaml
+          - products/{product_id}/specs/product-vision.md
+          - products/{product_id}/specs/mvp-scope.md
+          - .github/workflows/deploy-expense-tracker.yml
+          - governance/security-policy.md
+        output_files:
+          - products/{product_id}/app/vercel.json
+          - .github/workflows/deploy-{product_id}.yml
+        output_format: mixed
+        context_size: small
+        thinking_strategy: disabled
+        max_output_tokens: 8000
+        max_retries: 1
+        outcome_validation:
+          allow_empty: false
+          min_file_size_bytes: 100
+
+# ── Conflict Resolution ───────────────────────────────────
+conflict_resolution:
+  tier_1:
+    gates: [security-gate, a11y-gate]
+    rule: "Never compromise — block pipeline if RED, no exceptions"
+  tier_2:
+    gates: [quality-gate]
+    rule: "Governance decides — synthesize or escalate"
+  tier_3:
+    gates: [performance-gate]
+    rule: "Product decides — advisory only, never blocking"
+  resolver: exploration/synthesis-agent.md
+
+# ── Notification Channels ─────────────────────────────────
+notification_channels:
+  immediate:
+    - channel: file
+      path: state/decisions-pending.yaml
+      triggers: [human_required, retries_exhausted, gate_critical]
+  digest:
+    - channel: file
+      path: state/autonomous-actions-log.yaml
+      triggers: [full_autonomy_action]
+    - channel: script
+      cmd: bash scripts/daily-digest.sh
+      schedule: daily_09:00
+
+# ── State Files ───────────────────────────────────────────
+state_files:
+  pipeline_state:      "products/{product_id}/state/pipeline-state.yaml"
+  gate_reports_dir:    "products/{product_id}/state/gate-reports/"
+  autonomous_log:      "state/autonomous-actions-log.yaml"
+  feedback_queue:      "state/feedback-queue.yaml"
+  architecture_decisions: "state/architecture-decisions.yaml"
+  project_learnings:   "state/project-learnings.yaml"
+  decisions_pending:   "state/decisions-pending.yaml"
+  system_state:        "state/system-state.yaml"
+
+# ── Autonomy Contract ─────────────────────────────────────
+autonomy_contract:
+  FULL:
+    log_to: autonomous-actions-log.yaml
+    human_notification: digest
+    conditions:
+      max_lines_changed: 20
+      risk_levels: [very_low, low]
+      reversible: true
+  BATCH_APPROVAL:
+    log_to: decisions-pending.yaml
+    human_notification: digest
+    collect_until: "week_end_or_5_items"
+    conditions:
+      max_lines_changed: 100
+      risk_levels: [medium]
+  HUMAN_REQUIRED:
+    log_to: decisions-pending.yaml
+    human_notification: immediate
+    block_pipeline: true
+    escalation_after_hours: 48
+    conditions:
+      risk_levels: [high, critical]
+      triggers: [retries_exhausted, architecture_change, ethics]
