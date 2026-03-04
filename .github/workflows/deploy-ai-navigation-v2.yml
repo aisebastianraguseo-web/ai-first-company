@@ -208,7 +208,7 @@ jobs:
           vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.AI_NAV_V2_VERCEL_PROJECT_ID }}
           working-directory: ${{ env.PRODUCT_DIR }}
-          vercel-args: '--yes'
+          vercel-args: ''
 
   # ── Deploy Production (master) ───────────────────────────
   deploy-production:
@@ -234,7 +234,7 @@ jobs:
           vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.AI_NAV_V2_VERCEL_PROJECT_ID }}
           working-directory: ${{ env.PRODUCT_DIR }}
-          vercel-args: '--prod --yes'
+          vercel-args: '--prod'
 
       - name: Post-deploy notification
         run: |
