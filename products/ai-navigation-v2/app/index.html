@@ -1236,12 +1236,15 @@
 
     /* 23. Auth screen */
     .auth-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       background: var(--color-bg-subtle);
       padding: var(--space-xl);
+      overflow-y: auto;
     }
 
     .auth-card {

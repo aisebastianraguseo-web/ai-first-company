@@ -399,20 +399,20 @@ function initSliders() {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 async function boot() {
-  // Credentials check
+  // Show auth immediately — avoid blank/spinner state
+  showAuth();
+
   if (!_envConfig.supabaseUrl || !_envConfig.supabaseAnonKey) {
-    // Development mode: show auth with warning
-    console.warn('[app] No Supabase config — running in offline/demo mode');
-    document.getElementById('auth-screen').hidden = false;
-    document.getElementById('auth-screen').querySelector('.auth-card__subtitle').textContent =
-      'Demo-Modus — Backend nicht konfiguriert';
-  } else {
-    APIService.init({
-      supabaseUrl: _envConfig.supabaseUrl,
-      supabaseAnonKey: _envConfig.supabaseAnonKey,
-      getAccessToken: () => store.get('auth').user?.accessToken ?? null,
-    });
+    console.warn('[app] No Supabase config — credentials missing');
+    const subtitle = document.querySelector('.auth-card__subtitle');
+    if (subtitle) subtitle.textContent = 'Backend nicht konfiguriert — Credentials fehlen';
+    return; // Stop boot — nothing works without backend
   }
+
+  APIService.init({
+    supabaseUrl: _envConfig.supabaseUrl,
+    supabaseAnonKey: _envConfig.supabaseAnonKey,
+  });
 
   initNavigation();
   initSliders();
