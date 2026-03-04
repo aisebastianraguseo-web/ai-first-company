@@ -5,10 +5,12 @@ on:
     branches: [main, master]
     paths:
       - 'products/ai-navigation-v2/app/**'
+      - '.github/workflows/deploy-ai-navigation-v2.yml'
   pull_request:
     branches: [main, master]
     paths:
       - 'products/ai-navigation-v2/app/**'
+      - '.github/workflows/deploy-ai-navigation-v2.yml'
   workflow_dispatch:
 
 env:
