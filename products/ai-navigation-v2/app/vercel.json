@@ -34,10 +34,5 @@
       "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }
-  ],
-
-  "env": {
-    "SUPABASE_URL": "@ai-nav-v2-supabase-url",
-    "SUPABASE_ANON_KEY": "@ai-nav-v2-supabase-anon-key"
-  }
+  ]
 }
